@@ -2,60 +2,94 @@
 
 /* Map Container Styles */
 .map-container {
-    width: 100%; /* Memastikan peta mengisi seluruh ruang kanan */
+    width: 100%;
     height: 100%;
-    position: relative; /* Untuk positioning tombol overlay */
-    z-index: 1; /* Pastikan peta di bawah modal */
+    position: relative;
+    z-index: 1;
+    border-radius: 12px;
+    overflow: hidden;
 }
 
+/* Leaflet map styles */
+.leaflet-container {
+    border-radius: 12px; /* Menyesuaikan dengan map-container */
+}
+
+/* Map Controls Overlay */
 .map-controls-overlay {
     position: absolute;
     top: 15px;
     right: 15px;
-    z-index: 1000; /* Pastikan di atas peta */
+    z-index: 1000;
 }
 
 .toggle-map-button {
-    padding: 10px 18px; /* Slightly more horizontal padding */
-    background-color: #ffffff; /* Pure white background for a cleaner look */
-    color: #333; /* Darker text for better contrast */
-    border: none; /* Remove border for a sleek appearance */
-    border-radius: 25px; /* More rounded corners for elegance */
+    padding: 10px 18px;
+    background-color: #ffffff;
+    color: #333;
+    border: none;
+    border-radius: 25px;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Softer, more pronounced shadow */
-    font-size: 0.95em; /* Slightly larger font size */
-    font-weight: 500; /* Medium font weight */
-    transition: all 0.3s ease; /* Smooth transition for all properties */
-    display: flex; /* Use flexbox for icon and text alignment */
-    align-items: center; /* Vertically center content */
-    gap: 8px; /* Space between icon and text */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    font-size: 0.95em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .toggle-map-button:hover {
-    background-color: #f0f0f0; /* Light grey on hover */
-    box-shadow: 0 6px 16px rgba(0,0,0,0.2); /* Slightly larger shadow on hover */
-    transform: translateY(-1px); /* Subtle lift effect */
+    background-color: #f0f0f0;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
 }
 
 .toggle-map-button:active {
-    background-color: #e0e0e0; /* Darker grey when clicked */
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Smaller shadow when active */
-    transform: translateY(0); /* Reset lift effect */
+    background-color: #e0e0e0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transform: translateY(0);
 }
 
 /* Leaflet Popups */
 .leaflet-popup-content-wrapper {
-    border-radius: 8px;
+    border-radius: 12px; /* Sudut lebih bulat */
+    padding: 10px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15); /* Shadow lebih lembut */
+    font-family: inherit;
 }
 
 .leaflet-popup-content {
     font-size: 0.9em;
-    line-height: 1.5;
+    line-height: 1.6;
     color: #333;
+    max-width: 300px; /* Batasi lebar popup agar tidak terlalu lebar di desktop */
 }
 
 .popup-content-scrollable {
-    max-height: 200px; /* Batasi tinggi popup */
-    overflow-y: auto; /* Aktifkan scroll jika konten terlalu panjang */
-    padding-right: 5px; /* Sedikit padding untuk scrollbar */
+    max-height: 250px; /* Tingkatkan sedikit tinggi popup */
+    overflow-y: auto;
+    padding-right: 10px; /* Padding lebih baik untuk scrollbar */
+}
+
+.leaflet-popup-content b {
+    color: #1a1a1a;
+}
+
+.leaflet-popup-content span {
+    display: block;
+    margin-top: 5px;
+}
+
+/* Media Query untuk Popups di Seluler */
+@media (max-width: 768px) {
+    .leaflet-popup-content {
+        max-width: 250px; /* Sesuaikan lebar popup untuk layar seluler */
+        font-size: 0.85em; /* Ukuran font lebih kecil */
+        line-height: 1.4;
+    }
+
+    .popup-content-scrollable {
+        max-height: 200px; /* Sesuaikan tinggi scrollable */
+    }
 }

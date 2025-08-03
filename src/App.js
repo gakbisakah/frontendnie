@@ -8,7 +8,7 @@ import 'leaflet/dist/leaflet.css';
 import './styles/App.css';
 import './styles/MapComponents.css';
 import './styles/ProjectDescription.css';
-// Ensure ChatbotSidebar.css is imported within ChatbotSidebar.js itself.
+// Pastikan ChatbotSidebar.css diimpor di dalam ChatbotSidebar.js itu sendiri.
 
 // Import the new components
 import MapComponent from './MapComponent';
@@ -17,8 +17,10 @@ import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-   const API = process.env.REACT_APP_BACKEND_URL || '';
+    const API = process.env.REACT_APP_BACKEND_URL || '';
 
+    // State baru untuk mengontrol visibilitas sidebar di mobile
+    const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
@@ -140,6 +142,11 @@ export default function App() {
     const initialMapCenter = [-2, 118];
     const initialMapZoom = 5;
 
+    // Fungsi untuk menggeser sidebar (digunakan oleh tombol)
+    const toggleSidebar = () => {
+        setIsSidebarVisible(!isSidebarVisible);
+    };
+
     return (
         <>
             <AnimatePresence>
@@ -177,26 +184,34 @@ export default function App() {
                 )}
             </AnimatePresence>
 
+            {/* Kontainer utama aplikasi */}
             <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
-                <ChatbotSidebar
-                    showMainApp={showMainApp}
-                    showWelcomeOverlay={showWelcomeOverlay}
-                    chatInput={chatInput}
-                    setChatInput={setChatInput}
-                    chatHistory={chatHistory}
-                    setChatHistory={setChatHistory}
-                    chatLoading={chatLoading}
-                    setChatLoading={setChatLoading}
-                    handleFindMe={handleFindMe}
-                    geocodeLocation={geocodeLocation}
-                    setSearchedLocation={setSearchedLocation}
-                    setMyLocation={setMyLocation}
-                    searchLocationInput={searchLocationInput}
-                    setSearchLocationInput={setSearchLocationInput}
-                    setShowReportModal={setShowReportModal}
-                    handleStartApp={handleStartApp}
-                />
+                {/* Pembungkus (wrapper) sidebar dengan properti transform untuk animasi geser */}
+                <div 
+                    className="sidebar-wrapper" 
+                    style={{ transform: isSidebarVisible ? 'translateX(0)' : 'translateX(-100%)' }}
+                >
+                    <ChatbotSidebar
+                        showMainApp={showMainApp}
+                        showWelcomeOverlay={showWelcomeOverlay}
+                        chatInput={chatInput}
+                        setChatInput={setChatInput}
+                        chatHistory={chatHistory}
+                        setChatHistory={setChatHistory}
+                        chatLoading={chatLoading}
+                        setChatLoading={setChatLoading}
+                        handleFindMe={handleFindMe}
+                        geocodeLocation={geocodeLocation}
+                        setSearchedLocation={setSearchedLocation}
+                        setMyLocation={setMyLocation}
+                        searchLocationInput={searchLocationInput}
+                        setSearchLocationInput={setSearchLocationInput}
+                        setShowReportModal={setShowReportModal}
+                        handleStartApp={handleStartApp}
+                    />
+                </div>
 
+                {/* Konten kanan (peta) */}
                 <div className="right-content">
                     {!showMainApp ? (
                         <ProjectDescription />
@@ -214,6 +229,16 @@ export default function App() {
                     )}
                 </div>
             </div>
+
+            {/* Tombol yang hanya muncul di tampilan mobile */}
+            {/* KODE BARU */}
+            <button 
+                className={`toggle-map-button ${isSidebarVisible ? '' : 'hidden'}`}
+                onClick={toggleSidebar}
+            >
+                &gt;
+            </button>
+            {/* AKHIR KODE BARU */}
 
             <ReportModal
                 showReportModal={showReportModal}

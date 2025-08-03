@@ -1,3 +1,5 @@
+/* D:\ai-smartcare-map\frontend\src\styles\App.css */
+
 /* General Layout */
 body {
     margin: 0;
@@ -6,8 +8,8 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow: hidden; /* Prevent body scroll */
-    background-color: #f8f9fa; /* Lighter background for the whole page */
+    overflow: hidden;
+    background-color: #f8f9fa;
 }
 
 #root {
@@ -23,12 +25,13 @@ body {
     overflow: hidden;
     background-color: #f0f2f5;
     position: relative;
+    /* Default layout for desktop */
+    flex-direction: row; 
 }
 
-/* Kunci utama: Menambahkan backdrop-filter ke .main-container saat blur */
 .blur-background {
-    filter: blur(5px); /* Tetap pada main-container untuk memblur seluruh konten di belakang overlay */
-    pointer-events: none; /* Disable interactions when blurred */
+    filter: blur(5px);
+    pointer-events: none;
 }
 
 /* Sidebar (Chatbot) Styles */
@@ -363,36 +366,31 @@ body {
     transform: translateY(0);
 }
 
-
-/* Welcome Overlay - Perubahan utama di sini */
+/* Welcome Overlay */
 .welcome-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* Menghapus background-color overlay */
-    background-color: transparent; /* Transparan penuh */
+    background-color: transparent;
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 2000;
-    /* backdrop-filter dihapus dari sini, dipindahkan ke .main-container.blur-background */
 }
 
 .welcome-message {
-    color: rgb(19, 203, 19); /* Warna teks putih */
-    font-size: 3em;
+    color: #ffffff;
+    font-size: 3.5em; /* Ukuran font lebih besar untuk desktop */
     font-weight: bold;
-    text-shadow: 0 4px 10px rgba(221, 221, 221, 0.8); /* Shadow lebih kuat untuk teks agar menonjol */
-    /* Menghapus background-color dan padding dari teks */
-    background-color: transparent;
-    padding: 0;
-    border-radius: 0;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.6); /* Shadow lebih jelas */
+    background-color: rgba(0, 0, 0, 0.4); /* Latar belakang semi-transparan */
+    padding: 20px 40px;
+    border-radius: 12px;
     letter-spacing: 1px;
     text-align: center;
 }
-
 
 /* Modal Styles */
 .modal-bg {
@@ -555,4 +553,139 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* ---------------------------------------------------- */
+/* MEDIA QUERIES UNTUK TAMPILAN RESPONSIVE (SELULER) */
+/* ---------------------------------------------------- */
+
+@media (max-width: 768px) {
+    /* Main Layout - Stack elements vertically */
+    .main-container {
+        flex-direction: column;
+    }
+
+    /* Chatbot Sidebar */
+    .sidebar {
+        width: 100%; /* Ambil seluruh lebar layar */
+        height: 50vh; /* Peta dan chatbot berbagi tinggi layar */
+        padding: 15px; /* Kurangi padding untuk menghemat ruang */
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08); /* Shadow di bawah */
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        z-index: 1001; /* Pastikan di atas peta */
+    }
+
+    .start-screen-chatbot-wrapper,
+    .main-sidebar-active {
+        width: 100%; /* Pastikan wrapper menyesuaikan lebar penuh */
+    }
+
+    .app-title {
+        font-size: 1.5em; /* Ukuran font lebih kecil */
+        margin-bottom: 10px;
+    }
+
+    .chat-header {
+        padding-bottom: 10px;
+    }
+
+    .header-buttons button {
+        font-size: 0.8em; /* Ukuran font tombol lebih kecil */
+        padding: 7px 10px;
+    }
+
+    .chat-body {
+        padding: 10px; /* Kurangi padding di chat body */
+        margin-bottom: 10px;
+    }
+
+    .chat-msg {
+        font-size: 0.9em;
+        padding: 8px 12px;
+    }
+
+    .chat-input-area {
+        margin-bottom: 15px;
+    }
+
+    .chat-input-area input {
+        padding: 10px 12px;
+        font-size: 0.95em;
+    }
+
+    .chat-input-area button {
+        padding: 10px 18px;
+        font-size: 0.95em;
+    }
+
+    .start-button-in-sidebar {
+        padding: 15px 30px;
+        font-size: 1.1em;
+    }
+
+    /* Map Component */
+    .right-content {
+        width: 100%;
+        height: 50vh; /* Peta mengambil sisa 50% tinggi layar */
+    }
+
+    .map-container {
+        height: 100%;
+    }
+    
+    .map-controls-overlay {
+        top: 10px;
+        right: 10px;
+    }
+
+    .toggle-map-button {
+        font-size: 0.8em;
+        padding: 8px 16px;
+    }
+
+    /* Project Description (Mobile) */
+    .project-description {
+        display: none; /* Sembunyikan deskripsi di layar kecil */
+    }
+
+    /* Welcome Overlay & Modal */
+    .welcome-message {
+        font-size: 2em;
+        padding: 15px 30px;
+    }
+
+    .modal-card {
+        padding: 25px;
+        gap: 15px;
+    }
+
+    .modal-card h3 {
+        font-size: 1.5em;
+    }
+
+    .modal-btns button {
+        padding: 10px 20px;
+        font-size: 0.9em;
+    }
+}
+
+/* Penyesuaian untuk ukuran layar yang lebih besar dari mobile, tapi lebih kecil dari desktop normal (e.g., Tablet) */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .sidebar {
+        width: 380px;
+        padding: 20px;
+    }
+    .start-screen-chatbot-wrapper {
+        width: 380px;
+    }
+    .main-sidebar-active {
+        width: 420px;
+    }
+    .app-title {
+        font-size: 1.8em;
+    }
+    .chat-msg {
+        font-size: 0.9em;
+    }
 }
