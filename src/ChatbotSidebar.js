@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { motion } from 'framer-motion';
-import ReactMarkdown from 'react-markdown'; // Impor yang benar
+import ReactMarkdown from 'react-markdown';
+import { useNavigate } from 'react-router-dom';
 import './styles/ChatbotSidebar.css';
 
 // Component untuk merender pesan chat
@@ -40,55 +41,51 @@ export default function ChatbotSidebar({
 }) {
     const chatBodyRef = useRef(null);
     const [showQuickSearchSuggestions, setShowQuickSearchSuggestions] = useState(true);
+    const navigate = useNavigate();
 
-const quickSearchSuggestions = [
-  "Dimana letak [nama_lokasi]",
-  "Di mana posisi [nama_lokasi]",
-  "Lokasi [nama_lokasi]",
-  "Koordinat [nama lokasi]",
-  "Posisi [nama lokasi]",
-  "Data provinsi apa saja yang tersedia",
-  "Data kota/kotkab apa saja yang tersedia",
-  "Kecamatan apa saja yang tersedia",
-  "Desa apa saja yang tersedia",
-  "Bagaimana cuaca di [nama lokasi]",
-  "Cuaca saat ini di [nama lokasi]",
-  "Suhu tertinggi di [nama lokasi]",
-  "Suhu maksimum di [nama lokasi]",
-  "Suhu max... di [nama lokasi]",
-  "Suhu terendah di [nama lokasi]",
-  "Suhu minimum di [nama lokasi]",
-  "Suhu min... di [nama lokasi]",
-  "Kelembapan di [nama lokasi]",
-  "Kelembapan saat ini di [nama lokasi]",
-  "Ringkasan cuaca di [nama lokasi]",
-  "Summary cuaca [nama lokasi]",
-  "Cuaca dominan hari ini di [nama lokasi]",
-  "Desa mana saja di [nama provinsi] yang cuacanya cerah hari ini",
-  "Kecamatan mana saja yang cuaca dominannya mendung hari ini",
-  "Berapa suhu rata-rata di [nama kabupaten] hari ini",
-  "Bagaimana suhu maksimum, minimum, rata-rata, dan kelembapan rata-rata di [nama lokasi]",
-  "Suhu tertinggi dan terendah di [nama lokasi] berapa?",
-  "Suhu maksimum hari ini di [nama kota/kabupaten] berapa?",
-  "Kelembapan rata-rata harian di [nama desa] berapa?",
-  "Desa mana saja di [nama provinsi] yang suhunya paling rendah hari ini",
-  "Desa mana saja yang suhu maksimumnya paling tinggi hari ini",
-  "Kabupaten mana yang kelembapan rata-ratanya paling rendah",
-  "Apa saja hewan yang dapat dicek",
-  "Apa saja hewan yang bisa dicek",
-  "Daftar hewan",
-  "Daftar sayuran",
-  "Sayuran apa saja",
-  "Apakah suhu saat ini di [nama lokasi] cocok untuk [nama hewan]",
-  "Hewan apa saja yang cocok diternak di [nama lokasi] berdasarkan suhu rata-rata harian dan kelembapan rata-rata",
-  "Hewan apa saja yang cocok dipelihara di [nama lokasi] berdasarkan suhu rata-rata harian dan kelembapan rata-rata",
-  "Lokasi mana saja yang kelembapannya sesuai untuk [nama hewan]",
- 
- 
- 
-
-];
-
+    const quickSearchSuggestions = [
+        "Dimana letak [nama_lokasi]",
+        "Di mana posisi [nama_lokasi]",
+        "Lokasi [nama_lokasi]",
+        "Koordinat [nama lokasi]",
+        "Posisi [nama lokasi]",
+        "Data provinsi apa saja yang tersedia",
+        "Data kota/kotkab apa saja yang tersedia",
+        "Kecamatan apa saja yang tersedia",
+        "Desa apa saja yang tersedia",
+        "Bagaimana cuaca di [nama lokasi]",
+        "Cuaca saat ini di [nama lokasi]",
+        "Suhu tertinggi di [nama lokasi]",
+        "Suhu maksimum di [nama lokasi]",
+        "Suhu max... di [nama lokasi]",
+        "Suhu terendah di [nama lokasi]",
+        "Suhu minimum di [nama lokasi]",
+        "Suhu min... di [nama lokasi]",
+        "Kelembapan di [nama lokasi]",
+        "Kelembapan saat ini di [nama lokasi]",
+        "Ringkasan cuaca di [nama lokasi]",
+        "Summary cuaca [nama lokasi]",
+        "Cuaca dominan hari ini di [nama lokasi]",
+        "Desa mana saja di [nama provinsi] yang cuacanya cerah hari ini",
+        "Kecamatan mana saja yang cuaca dominannya mendung hari ini",
+        "Berapa suhu rata-rata di [nama kabupaten] hari ini",
+        "Bagaimana suhu maksimum, minimum, rata-rata, dan kelembapan rata-rata di [nama lokasi]",
+        "Suhu tertinggi dan terendah di [nama lokasi] berapa?",
+        "Suhu maksimum hari ini di [nama kota/kabupaten] berapa?",
+        "Kelembapan rata-rata harian di [nama desa] berapa?",
+        "Desa mana saja di [nama provinsi] yang suhunya paling rendah hari ini",
+        "Desa mana saja yang suhu maksimumnya paling tinggi hari ini",
+        "Kabupaten mana yang kelembapan rata-ratanya paling rendah",
+        "Apa saja hewan yang dapat dicek",
+        "Apa saja hewan yang bisa dicek",
+        "Daftar hewan",
+        "Daftar sayuran",
+        "Sayuran apa saja",
+        "Apakah suhu saat ini di [nama lokasi] cocok untuk [nama hewan]",
+        "Hewan apa saja yang cocok diternak di [nama lokasi] berdasarkan suhu rata-rata harian dan kelembapan rata-rata",
+        "Hewan apa saja yang cocok dipelihara di [nama lokasi] berdasarkan suhu rata-rata harian dan kelembapan rata-rata",
+        "Lokasi mana saja yang kelembapannya sesuai untuk [nama hewan]"
+    ];
 
     useEffect(() => {
         if (chatBodyRef.current) {
@@ -121,7 +118,6 @@ const quickSearchSuggestions = [
             const botResponseText = res.data.jawaban;
 
             setChatHistory(prev => [...prev, { type: 'bot', text: botResponseText }]);
-
         } catch (error) {
             console.error('Error fetching chatbot response:', error);
             setChatHistory(prev => [...prev, { type: 'bot', text: "Maaf, terjadi kesalahan saat berkomunikasi dengan chatbot. Mohon coba lagi nanti." }]);
@@ -206,6 +202,30 @@ const quickSearchSuggestions = [
                             whileTap={{ scale: 0.95 }}
                         >
                             🧹 Hapus Chat
+                        </motion.button>
+                        <motion.button
+                            onClick={() => navigate("/map")}
+                            className="report-button"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            🗺️ Wargabantuin Peta
+                        </motion.button>
+                        <motion.button
+                            onClick={() => navigate("/description")}
+                            className="report-button"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            📄 Wargabantuin Tentang
+                        </motion.button>
+                        <motion.button
+                            onClick={() => navigate("/logout")}
+                            className="exit-button"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            🚪 Keluar
                         </motion.button>
                     </div>
                 )}

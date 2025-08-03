@@ -1,4 +1,3 @@
-// D:\ai-smartcare-map\frontend\src\ReportModal.js
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,15 +14,16 @@ export default function ReportModal({
     const debounceTimeoutRef = useRef(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submissionMessage, setSubmissionMessage] = useState('');
+    const [successExtraMessage, setSuccessExtraMessage] = useState(''); // ✅ tambahan
 
     useEffect(() => {
         if (!showReportModal) {
-            // Reset form data and messages when modal closes
             setReportData({
                 lokasi: '', kategori: '', deskripsi: '', waktu: '', kontak: '',
                 lat: '', lon: '', setuju: false
             });
-            setSubmissionMessage(''); // Clear any previous submission messages
+            setSubmissionMessage('');
+            setSuccessExtraMessage(''); // ✅ reset saat modal ditutup
         }
     }, [showReportModal, setReportData]);
 
@@ -31,7 +31,6 @@ export default function ReportModal({
         if (debounceTimeoutRef.current) {
             clearTimeout(debounceTimeoutRef.current);
         }
-
         debounceTimeoutRef.current = setTimeout(async () => {
             if (locationName.trim().length > 2) {
                 setSubmissionMessage('Mencari koordinat lokasi...');
@@ -82,6 +81,7 @@ export default function ReportModal({
 
         setIsSubmitting(true);
         setSubmissionMessage('Mengirim laporan...');
+        setSuccessExtraMessage(''); // reset
 
         let finalLat = reportData.lat;
         let finalLon = reportData.lon;
@@ -109,19 +109,18 @@ export default function ReportModal({
                 lon: finalLon,
                 waktu: reportData.waktu || new Date().toISOString()
             };
-            delete reportDataToSend.setuju; // Don't send 'setuju' field to backend
+            delete reportDataToSend.setuju;
 
             await axios.post('/api/laporan', reportDataToSend);
-            setSubmissionMessage('Laporan berhasil dikirim!'); // Show success message
-            // Fetch updated reports to refresh map markers
+            setSubmissionMessage('Laporan berhasil dikirim!');
+            setSuccessExtraMessage('Berhasil dilaporkan dan laporan tampil di halaman Peta dengan penanda warna hijau'); // ✅ tambahan
+
             const res = await axios.get('/api/all_laporan');
             setAllLaporan(res.data.laporan || []);
 
-            // Automatically close modal after 1.5 seconds
             setTimeout(() => {
                 setShowReportModal(false);
-            }, 1500); // Close after 1.5 seconds
-
+            }, 1500);
         } catch (e) {
             console.error('Error submitting report:', e);
             setSubmissionMessage('Gagal mengirim laporan. Silakan coba lagi nanti.');
@@ -188,7 +187,7 @@ export default function ReportModal({
                             placeholder="Deskripsi masalah atau kejadian (wajib diisi)"
                             value={reportData.deskripsi}
                             onChange={handleReportChange}
-                            rows="1" // Tetap 3 baris seperti perbaikan sebelumnya
+                            rows="1"
                             disabled={isSubmitting}
                             required
                         ></textarea>
@@ -227,6 +226,18 @@ export default function ReportModal({
                                 transition={{ duration: 0.3 }}
                             >
                                 {submissionMessage}
+                            </motion.p>
+                        )}
+
+                        {successExtraMessage && ( // ✅ tambahan
+                            <motion.p
+                                className="submission-message success"
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.3 }}
+                            >
+                                {successExtraMessage}
                             </motion.p>
                         )}
 

@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'; // ✅ tambahkan ini
 import 'leaflet/dist/leaflet.css';
 
 // Import CSS files
 import './styles/App.css';
 import './styles/MapComponents.css';
 import './styles/ProjectDescription.css';
-// Ensure ChatbotSidebar.css is imported within ChatbotSidebar.js itself.
 
 // Import the new components
 import MapComponent from './MapComponent';
@@ -17,8 +17,7 @@ import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-   const API = process.env.REACT_APP_BACKEND_URL || '';
-
+    const API = process.env.REACT_APP_BACKEND_URL || '';
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
@@ -78,7 +77,6 @@ export default function App() {
 
         fetchAllLokasi();
         const interval = setInterval(fetchAllLokasi, 10000);
-
         return () => clearInterval(interval);
     }, [showMainApp, API]);
 
@@ -96,7 +94,6 @@ export default function App() {
 
         fetchAllLaporan();
         const interval = setInterval(fetchAllLaporan, 10000);
-
         return () => clearInterval(interval);
     }, [showMainApp, API]);
 
@@ -141,7 +138,7 @@ export default function App() {
     const initialMapZoom = 5;
 
     return (
-        <>
+        <BrowserRouter> {/* ✅ tambahkan wrapper Router */}
             <AnimatePresence>
                 {showWelcomeOverlay && (
                     <motion.div
@@ -177,53 +174,77 @@ export default function App() {
                 )}
             </AnimatePresence>
 
-            <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
-                <ChatbotSidebar
-                    showMainApp={showMainApp}
-                    showWelcomeOverlay={showWelcomeOverlay}
-                    chatInput={chatInput}
-                    setChatInput={setChatInput}
-                    chatHistory={chatHistory}
-                    setChatHistory={setChatHistory}
-                    chatLoading={chatLoading}
-                    setChatLoading={setChatLoading}
-                    handleFindMe={handleFindMe}
-                    geocodeLocation={geocodeLocation}
-                    setSearchedLocation={setSearchedLocation}
-                    setMyLocation={setMyLocation}
-                    searchLocationInput={searchLocationInput}
-                    setSearchLocationInput={setSearchLocationInput}
-                    setShowReportModal={setShowReportModal}
-                    handleStartApp={handleStartApp}
-                />
+            <Routes> {/* ✅ tambahkan ini */}
+                <Route path="/" element={
+                    <>
+                        <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
+                            <ChatbotSidebar
+                                showMainApp={showMainApp}
+                                showWelcomeOverlay={showWelcomeOverlay}
+                                chatInput={chatInput}
+                                setChatInput={setChatInput}
+                                chatHistory={chatHistory}
+                                setChatHistory={setChatHistory}
+                                chatLoading={chatLoading}
+                                setChatLoading={setChatLoading}
+                                handleFindMe={handleFindMe}
+                                geocodeLocation={geocodeLocation}
+                                setSearchedLocation={setSearchedLocation}
+                                setMyLocation={setMyLocation}
+                                searchLocationInput={searchLocationInput}
+                                setSearchLocationInput={setSearchLocationInput}
+                                setShowReportModal={setShowReportModal}
+                                handleStartApp={handleStartApp}
+                            />
 
-                <div className="right-content">
-                    {!showMainApp ? (
-                        <ProjectDescription />
-                    ) : (
-                        <MapComponent
-                            myLocation={myLocation}
-                            searchedLocation={searchedLocation}
-                            allLokasi={allLokasi}
-                            allLaporan={allLaporan}
-                            mapType={mapType}
-                            setMapType={setMapType}
+                            <div className="right-content">
+                                {!showMainApp ? (
+                                    <ProjectDescription />
+                                ) : (
+                                    <MapComponent
+                                        myLocation={myLocation}
+                                        searchedLocation={searchedLocation}
+                                        allLokasi={allLokasi}
+                                        allLaporan={allLaporan}
+                                        mapType={mapType}
+                                        setMapType={setMapType}
+                                        initialMapCenter={initialMapCenter}
+                                        initialMapZoom={initialMapZoom}
+                                    />
+                                )}
+                            </div>
+                        </div>
+
+                        <ReportModal
+                            showReportModal={showReportModal}
+                            setShowReportModal={setShowReportModal}
+                            reportData={reportData}
+                            setReportData={setReportData}
+                            geocodeLocation={geocodeLocation}
                             initialMapCenter={initialMapCenter}
-                            initialMapZoom={initialMapZoom}
+                            setAllLaporan={setAllLaporan}
                         />
-                    )}
-                </div>
-            </div>
+                    </>
+                } />
+              <Route 
+  path="/map" 
+  element={
+    <MapComponent
+      myLocation={myLocation}
+      searchedLocation={searchedLocation}
+      allLokasi={allLokasi}
+      allLaporan={allLaporan}
+      mapType={mapType}
+      setMapType={setMapType}
+      initialMapCenter={initialMapCenter}
+      initialMapZoom={initialMapZoom}
+    />
+  }
+/>
 
-            <ReportModal
-                showReportModal={showReportModal}
-                setShowReportModal={setShowReportModal}
-                reportData={reportData}
-                setReportData={setReportData}
-                geocodeLocation={geocodeLocation}
-                initialMapCenter={initialMapCenter}
-                setAllLaporan={setAllLaporan}
-            />
-        </>
+                <Route path="/description" element={<ProjectDescription />} />
+                <Route path="/logout" element={<div style={{ padding: '2rem' }}>✅ Kamu sudah logout.</div>} />
+            </Routes>
+        </BrowserRouter>
     );
 }
