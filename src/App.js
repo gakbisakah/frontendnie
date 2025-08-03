@@ -17,11 +17,11 @@ import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-   const API = process.env.REACT_APP_BACKEND_URL || '';
-
+    const API = process.env.REACT_APP_BACKEND_URL || '';
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
+    const [showMapOnMobile, setShowMapOnMobile] = useState(true);
 
     const [allLokasi, setAllLokasi] = useState([]);
     const [allLaporan, setAllLaporan] = useState([]);
@@ -137,6 +137,10 @@ export default function App() {
         }, 2000);
     };
 
+    const toggleMapView = () => {
+        setShowMapOnMobile(prev => !prev);
+    };
+
     const initialMapCenter = [-2, 118];
     const initialMapZoom = 5;
 
@@ -195,10 +199,11 @@ export default function App() {
                     setSearchLocationInput={setSearchLocationInput}
                     setShowReportModal={setShowReportModal}
                     handleStartApp={handleStartApp}
+                    toggleMapView={toggleMapView}
                 />
 
                 <div className="right-content">
-                    {!showMainApp ? (
+                    {!showMainApp || !showMapOnMobile ? (
                         <ProjectDescription />
                     ) : (
                         <MapComponent
