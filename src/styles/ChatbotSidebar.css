@@ -1,19 +1,18 @@
-/* D:\ai-smartcare-map\frontend\src\styles\ChatbotSidebar.css */
-
+/* General Sidebar Styling */
 /* General Sidebar Styling */
 .sidebar {
-    background: linear-gradient(180deg, #e6ffe6, #d0f0d0);
-    border-right: 1px solid #b3e6b3;
-    display: flex;
-    flex-direction: column;
-    padding: 15px;
-    box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08);
-    position: relative;
-    width: 600px;
-    height: 100vh;
-    overflow: hidden;
-    z-index: 10;
-    transition: width 0.3s ease-in-out, transform 0.5s ease-in-out;
+background: linear-gradient(180deg, #e6ffe6, #d0f0d0); /* Very light, elegant green gradient */
+border-right: 1px solid #b3e6b3; /* Softer green border */
+display: flex;
+flex-direction: column;
+padding: 5px; /* Mengurangi padding secara signifikan untuk menggeser konten ke atas */
+box-shadow: 2px 0 15px rgba(0, 0, 0, 0.08); /* Stronger shadow */
+position: relative;
+width: 600px; /* Lebar diperbarui menjadi 900px, 2x lipat dari 450px */
+height: 100vh; /* Sidebar mengambil 100% tinggi viewport */
+overflow: hidden; /* Sembunyikan overflow pada sidebar utama */
+z-index: 10;
+transition: width 0.3s ease-in-out;
 }
 
 /* Specific styling for the start screen state */
@@ -24,13 +23,13 @@
 /* Chat Header */
 .chat-header {
     text-align: center;
-    margin-bottom: 10px;
+    margin-bottom: 0px; /* Tetap 0px, karena sudah minimal */
 }
 
 .app-title {
     font-size: 2.5em;
     color: #1a5e1a;
-    margin-bottom: 10px;
+    margin-bottom: 0px; /* Tetap 0px, karena sudah minimal */
     font-weight: 800;
     letter-spacing: 1px;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -41,8 +40,8 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 0px; /* Mengurangi margin atas */
+    margin-bottom: 0px; /* Mengurangi margin bawah */
 }
 
 /* Common button styles */
@@ -52,11 +51,11 @@
 .location-search-area button,
 .chat-input-area button,
 .start-button-in-sidebar,
-.quick-search-button {
+.quick-search-button { /* Added quick-search-button here */
     position: relative;
     background-color: #2e8b57;
     color: white;
-    padding: 10px 8px;
+    padding: 10px 8px; /* Padding ini cukup untuk teks terlihat */
     border: none;
     border-radius: 10px;
     font-size: 0.9em;
@@ -70,16 +69,17 @@
     justify-content: center;
     text-align: center;
     gap: 5px;
-    white-space: nowrap;
+    white-space: nowrap; /* Pastikan teks tidak patah */
 }
 
+/* Hover, Active, Disabled states remain the same */
 .report-button:hover,
 .find-me-button:hover,
 .clear-chat-button:hover,
 .location-search-area button:hover,
 .chat-input-area button:hover,
 .start-button-in-sidebar:hover,
-.quick-search-button:hover {
+.quick-search-button:hover { /* Added quick-search-button here */
     background-color: #256d43;
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 7px 18px rgba(0, 0, 0, 0.2);
@@ -91,7 +91,7 @@
 .location-search-area button:active,
 .chat-input-area button:active,
 .start-button-in-sidebar:active,
-.quick-search-button:active {
+.quick-search-button:active { /* Added quick-search-button here */
     transform: translateY(0) scale(0.98);
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
 }
@@ -102,7 +102,7 @@
 .location-search-area button:disabled,
 .chat-input-area button:disabled,
 .start-button-in-sidebar:disabled,
-.quick-search-button:disabled {
+.quick-search-button:disabled { /* Added quick-search-button here */
     background-color: #a0aec0;
     cursor: not-allowed;
     box-shadow: none;
@@ -110,13 +110,14 @@
     opacity: 0.7;
 }
 
+/* Sparkle Effect remains the same */
 .report-button::after,
 .find-me-button::after,
 .clear-chat-button::after,
 .location-search-area button::after,
 .chat-input-area button::after,
 .start-button-in-sidebar::after,
-.quick-search-button::after {
+.quick-search-button::after { /* Added quick-search-button here */
     content: '';
     position: absolute;
     top: 0;
@@ -134,7 +135,7 @@
 .location-search-area button:hover::after,
 .chat-input-area button:hover::after,
 .start-button-in-sidebar:hover::after,
-.quick-search-button:hover::after {
+.quick-search-button:hover::after { /* Added quick-search-button here */
     left: 100%;
     transition: left 0.8s ease-out;
 }
@@ -143,7 +144,7 @@
 .location-search-area {
     display: flex;
     gap: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 0px; /* Mengurangi margin bawah */
     padding: 0 5px;
 }
 
@@ -165,25 +166,26 @@
 /* New Quick Search Suggestions Styling */
 .quick-search-suggestions {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allow suggestions to wrap to the next line */
     gap: 8px;
-    margin-bottom: 10px;
-    padding: 10px;
-    max-height: 150px;
-    overflow-y: auto;
-    background-color: #f8fff8;
+    margin-bottom: 0px; /* Mengurangi margin bawah */
+    padding: 0 5px;
+    max-height: 150px; /* Limit height to prevent taking too much space */
+    overflow-y: auto; /* Enable scrolling if too many suggestions */
+    background-color: #f8fff8; /* Light background for the suggestion area */
     border-radius: 10px;
+    padding: 10px;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .quick-search-button {
-    background-color: #4CAF50;
+    background-color: #4CAF50; /* A slightly different green for suggestions */
     color: white;
-    padding: 8px 12px;
-    font-size: 0.85em;
+    padding: 8px 12px; /* Smaller padding for suggestions */
+    font-size: 0.85em; /* Smaller font size */
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent buttons from shrinking too much */
 }
 
 .quick-search-button:hover {
@@ -192,17 +194,19 @@
     box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
 }
 
+
 /* Chat Body */
 .chat-body {
-    flex-grow: 1;
-    overflow-y: auto;
+    flex-grow: 1; /* Ini sangat penting, agar mengambil sisa ruang */
+    overflow-y: auto; /* HANYA bagian chat body yang bisa di-scroll */
     padding: 15px;
     background-color: #ffffff;
     border-radius: 12px;
     box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.08);
-    margin-bottom: 10px;
+    margin-bottom: 10px; /* Sedikit margin sebelum input area */
     display: flex;
     flex-direction: column;
+    /* Tidak perlu min-height atau max-height di sini karena flex-grow: 1 dan overflow: hidden di parent akan menanganinya */
 }
 
 .chat-msg {
@@ -238,9 +242,20 @@
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.02); opacity: 0.8; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* Chat Input Area */
@@ -248,7 +263,7 @@
     display: flex;
     gap: 8px;
     padding: 0 5px;
-    margin-top: auto;
+    margin-top: auto; /* Ini akan mendorong input area ke bawah */
 }
 
 .chat-input-area input {
@@ -279,146 +294,43 @@
     background-color: #1a6f3b;
 }
 
-/*
-    ----------------------------------------------------
-    MEDIA QUERIES UNTUK TAMPILAN RESPONSIVE (SELULER)
-    ----------------------------------------------------
-*/
+/* Responsive adjustments if needed */
 @media (max-width: 768px) {
-    /* Main container di mobile */
-    .main-container {
-        flex-direction: column;
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Sidebar di mobile - mengambil 100% lebar dan tinggi layar */
     .sidebar {
-        width: 100vw;
-        height: 100vh;
+        width: 100%;
+        height: 100vh; /* Sidebar mengambil 100% tinggi viewport pada mobile */
         position: fixed;
-        top: 0;
+        bottom: 0;
         left: 0;
-        z-index: 1000;
-        border: none;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-        transform: translateX(0);
-    }
-    
-    /* Peta di mobile */
-    .map-container {
-        width: 100vw;
-        height: 100vh;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: 999;
-    }
-    
-    /* Sembunyikan deskripsi proyek */
-    .project-description {
-        display: none;
+        border-right: none;
+        border-top: 1px solid #dcdfe6;
+        padding: 15px;
     }
 
-    /* Tombol panah untuk menggeser sidebar */
-    .toggle-map-button {
-        display: block; /* Hanya tampil di mobile */
-        position: fixed;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 1001; /* Pastikan di atas sidebar */
-        background-color: #2e8b57;
-        color: white;
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        font-size: 1.5em;
-        line-height: 45px;
-        text-align: center;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        transition: transform 0.3s ease, opacity 0.5s ease;
-        opacity: 1;
-    }
-    
-    .toggle-map-button.hidden {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    /* Penyesuaian layout di dalam sidebar untuk mobile */
     .app-title {
-        font-size: 1.8em;
-    }
-
-    .chat-header {
-        margin-bottom: 5px;
+        font-size: 2em;
     }
 
     .header-buttons {
-        grid-template-columns: 1fr;
-        gap: 5px;
-        margin-top: 5px;
-        margin-bottom: 5px;
+        grid-template-columns: 1fr; /* Stack buttons vertically on small screens */
+        gap: 8px;
     }
 
     .report-button,
     .find-me-button,
     .clear-chat-button {
         width: 100%;
-        padding: 8px 10px;
-        font-size: 0.9em;
+        padding: 12px 10px;
+        font-size: 1em;
     }
 
     .chat-body {
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-    }
-
-    .chat-msg {
-        font-size: 0.85em;
-        padding: 8px 12px;
-        margin-bottom: 5px;
-    }
-
-    .location-search-area {
-        margin-bottom: 8px;
-        padding: 0;
-    }
-    
-    .location-search-area input {
-        padding: 8px;
-    }
-
-    .location-search-area button {
-        padding: 8px 15px;
+        /* Pada mobile, biarkan flex-grow: 1 melakukan tugasnya */
+        min-height: auto; /* Reset min-height */
+        max-height: none; /* Reset max-height */
     }
 
     .quick-search-suggestions {
-        max-height: 80px;
-        padding: 5px;
-        gap: 5px;
-        margin-bottom: 8px;
-    }
-
-    .quick-search-button {
-        font-size: 0.75em;
-        padding: 6px 10px;
-    }
-
-    .chat-input-area {
-        gap: 5px;
-        padding: 0;
-    }
-    
-    .chat-input-area input {
-        padding: 8px;
-    }
-    
-    .chat-input-area button {
-        padding: 8px 15px;
+        max-height: 100px; /* Adjust max-height for mobile if needed */
     }
 }
