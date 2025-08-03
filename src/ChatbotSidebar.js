@@ -44,15 +44,15 @@ export default function ChatbotSidebar({
     const navigate = useNavigate();
 
     const quickSearchSuggestions = [
+         "Data provinsi apa saja yang tersedia",
+        "Data kota/kotkab apa saja yang tersedia",
+        "Kecamatan apa saja yang tersedia",
+        "Desa apa saja yang tersedia",
         "Dimana letak [nama_lokasi]",
         "Di mana posisi [nama_lokasi]",
         "Lokasi [nama_lokasi]",
         "Koordinat [nama lokasi]",
         "Posisi [nama lokasi]",
-        "Data provinsi apa saja yang tersedia",
-        "Data kota/kotkab apa saja yang tersedia",
-        "Kecamatan apa saja yang tersedia",
-        "Desa apa saja yang tersedia",
         "Bagaimana cuaca di [nama lokasi]",
         "Cuaca saat ini di [nama lokasi]",
         "Suhu tertinggi di [nama lokasi]",
