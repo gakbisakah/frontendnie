@@ -24,8 +24,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "postbuild": "echo Build finished!"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -45,7 +44,6 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:5000",
   "engines": {
     "node": ">=18.x"
   }

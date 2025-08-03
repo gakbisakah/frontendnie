@@ -17,7 +17,12 @@ import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-    const API = process.env.REACT_APP_BACKEND_URL || '';
+   const API = 
+    process.env.REACT_APP_BACKEND_URL && process.env.REACT_APP_BACKEND_URL !== '' 
+        ? process.env.REACT_APP_BACKEND_URL 
+        : window.location.origin;
+
+
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
