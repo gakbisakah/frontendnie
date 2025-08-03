@@ -17,11 +17,11 @@ import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-    const API = process.env.REACT_APP_BACKEND_URL || '';
+   const API = process.env.REACT_APP_BACKEND_URL || '';
+
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
-    const [showMapOnMobile, setShowMapOnMobile] = useState(false); // Mengubah nilai awal menjadi 'false'
 
     const [allLokasi, setAllLokasi] = useState([]);
     const [allLaporan, setAllLaporan] = useState([]);
@@ -134,12 +134,7 @@ export default function App() {
         setTimeout(() => {
             setShowWelcomeOverlay(false);
             setShowMainApp(true);
-            setShowMapOnMobile(true); // Setelah masuk, tampilkan peta di mobile secara default
         }, 2000);
-    };
-
-    const toggleMapView = () => {
-        setShowMapOnMobile(prev => !prev);
     };
 
     const initialMapCenter = [-2, 118];
@@ -200,12 +195,10 @@ export default function App() {
                     setSearchLocationInput={setSearchLocationInput}
                     setShowReportModal={setShowReportModal}
                     handleStartApp={handleStartApp}
-                    toggleMapView={toggleMapView}
-                    showMapOnMobile={showMapOnMobile} // Meneruskan state ini
                 />
 
                 <div className="right-content">
-                    {!showMainApp || !showMapOnMobile ? (
+                    {!showMainApp ? (
                         <ProjectDescription />
                     ) : (
                         <MapComponent
