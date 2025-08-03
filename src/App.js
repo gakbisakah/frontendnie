@@ -21,7 +21,7 @@ export default function App() {
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
-    const [showMapOnMobile, setShowMapOnMobile] = useState(true);
+    const [showMapOnMobile, setShowMapOnMobile] = useState(false); // Mengubah nilai awal menjadi 'false'
 
     const [allLokasi, setAllLokasi] = useState([]);
     const [allLaporan, setAllLaporan] = useState([]);
@@ -134,6 +134,7 @@ export default function App() {
         setTimeout(() => {
             setShowWelcomeOverlay(false);
             setShowMainApp(true);
+            setShowMapOnMobile(true); // Setelah masuk, tampilkan peta di mobile secara default
         }, 2000);
     };
 
@@ -200,6 +201,7 @@ export default function App() {
                     setShowReportModal={setShowReportModal}
                     handleStartApp={handleStartApp}
                     toggleMapView={toggleMapView}
+                    showMapOnMobile={showMapOnMobile} // Meneruskan state ini
                 />
 
                 <div className="right-content">

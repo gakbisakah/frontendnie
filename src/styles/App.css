@@ -556,6 +556,7 @@ body {
     flex-direction: column;
     overflow: hidden;
 }
+/* ...existing CSS code... */
 
 .header-buttons button.wargabantuin-map-button {
     background-color: #f1c40f; /* Warna kuning yang menarik */
@@ -565,4 +566,15 @@ body {
 
 .header-buttons button.wargabantuin-map-button:hover {
     background-color: #f39c12; /* Warna kuning yang sedikit lebih gelap saat hover */
+}
+
+/* Tambahan styling untuk tombol di layar awal mobile */
+.start-screen-chatbot-wrapper .wargabantuin-map-button.mobile-start-button {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    left: unset;
+    font-size: 14px;
+    padding: 10px 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }

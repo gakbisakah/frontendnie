@@ -37,14 +37,14 @@ export default function ChatbotSidebar({
     setSearchLocationInput,
     setShowReportModal,
     handleStartApp,
-    toggleMapView // Terima handler baru dari App.js
+    toggleMapView,
+    showMapOnMobile // Menerima state baru untuk mengontrol teks tombol
 }) {
     const chatBodyRef = useRef(null);
     const [showQuickSearchSuggestions, setShowQuickSearchSuggestions] = useState(true);
     const [isAndroid, setIsAndroid] = useState(false);
 
     useEffect(() => {
-        // Deteksi User-Agent untuk mengetahui perangkat Android
         const userAgent = navigator.userAgent || navigator.vendor || window.opera;
         if (/android/i.test(userAgent)) {
             setIsAndroid(true);
@@ -176,6 +176,9 @@ export default function ChatbotSidebar({
         setShowQuickSearchSuggestions(false);
     };
 
+    // Tentukan teks tombol berdasarkan state showMapOnMobile
+    const mapButtonText = showMapOnMobile ? "Wargabantuin Peta" : "Wargabantuin Deskripsi";
+
     return (
         <motion.div
             className={`sidebar ${!showMainApp ? 'start-screen-chatbot-wrapper' : 'main-sidebar-active'}`}
@@ -221,7 +224,7 @@ export default function ChatbotSidebar({
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                             >
-                                Wargabantuin Peta
+                                {mapButtonText} {/* Menggunakan teks yang dinamis */}
                             </motion.button>
                         )}
                     </div>
@@ -306,6 +309,18 @@ export default function ChatbotSidebar({
                     disabled={chatLoading || showWelcomeOverlay}
                 >
                     Masuk
+                </motion.button>
+            )}
+
+            {/* Tombol Wargabantuin Deskripsi yang muncul di layar awal Android */}
+            {!showMainApp && isAndroid && (
+                <motion.button
+                    onClick={toggleMapView}
+                    className="wargabantuin-map-button mobile-start-button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    {mapButtonText}
                 </motion.button>
             )}
         </motion.div>
