@@ -65,49 +65,25 @@ export default function ProjectDescription() {
     <div className="description-section">
   <h4 className="section-title">🧠 Contoh Pertanyaan Lengkap yang Bisa Ditanyakan</h4>
   <div className="questions-list">
-    <ul>
-      <li>“Dimana letak [nama_lokasi]”</li>
-      <li>“Di mana posisi [nama_lokasi]”</li>
-      <li>“Lokasi [nama_lokasi]”</li>
-      <li>“Koordinat [nama lokasi]”</li>
-      <li>“Posisi [nama lokasi]”</li>
-      <li>“Data provinsi apa saja yang tersedia”</li>
-      <li>“Data kota/kotkab apa saja yang tersedia”</li>
-      <li>“Kecamatan apa saja yang tersedia”</li>
-      <li>“Desa apa saja yang tersedia”</li>
-      <li>“Bagaimana cuaca di [nama lokasi]”</li>
-      <li>“Cuaca saat ini di [nama lokasi]”</li>
-      <li>“Suhu tertinggi di [nama lokasi]”</li>
-      <li>“Suhu maksimum di [nama lokasi]”</li>
-      <li>“Suhu max... di [nama lokasi]”</li>
-      <li>“Suhu terendah di [nama lokasi]”</li>
-      <li>“Suhu minimum di [nama lokasi]”</li>
-      <li>“Suhu min... di [nama lokasi]”</li>
-      <li>“Kelembapan di [nama lokasi]”</li>
-      <li>“Kelembapan saat ini di [nama lokasi]”</li>
-      <li>“Ringkasan cuaca di [nama lokasi]”</li>
-      <li>“Summary cuaca [nama lokasi]”</li>
-      <li>“Cuaca dominan hari ini di [nama lokasi]”</li>
-      <li>“Desa mana saja di [nama provinsi] yang cuacanya cerah hari ini”</li>
-      <li>“Kecamatan mana saja yang cuaca dominannya mendung hari ini”</li>
-      <li>“Berapa suhu rata-rata di [nama kabupaten] hari ini”</li>
-      <li>“Bagaimana suhu maksimum, minimum, rata-rata, dan kelembapan rata-rata di [nama lokasi]”</li>
-      <li>“Suhu tertinggi dan terendah di [nama lokasi] berapa?”</li>
-      <li>“Suhu maksimum hari ini di [nama kota/kabupaten] berapa?”</li>
-      <li>“Kelembapan rata-rata harian di [nama desa] berapa?”</li>
-      <li>“Desa mana saja di [nama provinsi] yang suhunya paling rendah hari ini”</li>
-      <li>“Desa mana saja yang suhu maksimumnya paling tinggi hari ini”</li>
-      <li>“Kabupaten mana yang kelembapan rata-ratanya paling rendah”</li>
-      <li>“Apa saja hewan yang dapat dicek”</li>
-      <li>“Apa saja hewan yang bisa dicek”</li>
-      <li>“Daftar hewan”</li>
-      <li>“Daftar sayuran”</li>
-      <li>“Sayuran apa saja”</li>
-      <li>“Apakah suhu saat ini di [nama lokasi] cocok untuk [nama hewan]”</li>
-      <li>“Hewan apa saja yang cocok diternak di [nama lokasi] berdasarkan suhu rata-rata harian dan kelembapan rata-rata”</li>
-      <li>“Hewan apa saja yang cocok dipelihara di [nama lokasi] berdasarkan suhu rata-rata harian dan kelembapan rata-rata”</li>
-      <li>“Lokasi mana saja yang kelembapannya sesuai untuk [nama hewan]”</li>
-    </ul>
+  <ul>
+  <li>“Data provinsi apa saja yang tersedia”</li>
+  <li>“Data kota/kotkab apa saja yang tersedia”</li>
+  <li>“Kecamatan apa saja yang tersedia”</li>
+  <li>“Desa apa saja yang tersedia”</li>
+  <li>“Apa saja hewan yang dapat dicek”</li>
+  <li>“Daftar sayuran”</li>
+  <li>“[Nama Hewan] cocok di mana?”</li>
+  <li> “[Nama Sayuran] cocok di mana?”</li>
+   <li>“Dimana letak [nama_lokasi]”</li>
+   <li>“Di mana posisi [nama_lokasi]”</li>
+      <li>“"Koordinat [nama lokasi]”</li>
+  <li>“Bagaimana cuaca di [nama lokasi]”</li>
+  <li>“Suhu tertinggi di [nama lokasi]”</li>
+  <li>“Suhu terendah di [nama lokasi]”</li>
+  <li>“Kelembapan di [nama lokasi]”</li>
+  <li>“Ringkasan cuaca di [nama lokasi]”</li>
+</ul>
+
 
 
            <p>✅ <strong>Keterangan input:</strong></p>
