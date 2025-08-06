@@ -43,29 +43,29 @@ export default function MapComponent({
   // State untuk nearestData dari searchedLocation
   const [searchedNearestData, setSearchedNearestData] = useState(null);
 
-// Untuk myLocation
 useEffect(() => {
   if (myLocation) {
     const fetchNearest = async () => {
       try {
         const res = await fetch(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`);
-        const contentType = res.headers.get("content-type");
+        const text = await res.text();  // Ambil raw response
 
-        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-        if (!contentType || !contentType.includes("application/json")) {
-          const text = await res.text(); // baca isi response jika bukan JSON
-          throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
+        try {
+          const json = JSON.parse(text); // coba parse manual
+          setNearestData(json);
+        } catch (parseError) {
+          console.error('❌ Gagal parse JSON:', parseError);
+          console.warn('📦 Response yang diterima (bukan JSON):', text);
         }
 
-        const data = await res.json();
-        setNearestData(data);
       } catch (error) {
-        console.error('❌ Error fetching nearest location for myLocation:', error);
+        console.error('❌ Error fetch dari API:', error);
       }
     };
     fetchNearest();
   }
 }, [myLocation]);
+
 
 // Untuk searchedLocation
 useEffect(() => {
