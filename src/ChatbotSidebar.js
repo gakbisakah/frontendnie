@@ -5,7 +5,10 @@ import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import './styles/ChatbotSidebar.css';
 
-// Component untuk merender pesan chat
+// ✅ Tambahkan API dari .env
+const API = process.env.REACT_APP_BACKEND_URL || 'https://bisakah.pythonanywhere.com';
+
+// Komponen untuk merender pesan chat
 const ChatMessage = ({ type, text }) => {
     if (type === 'bot') {
         return (
@@ -68,6 +71,10 @@ export default function ChatbotSidebar({
         }
     }, [chatHistory]);
 
+    useEffect(() => {
+        console.log("📡 Chatbot Sidebar API:", API);
+    }, []);
+
     const handleChatSubmit = async (e) => {
         e.preventDefault();
         const userMessage = chatInput.trim();
@@ -89,13 +96,14 @@ export default function ChatbotSidebar({
                 handleFindMe(true);
             }
 
-            const res = await axios.post('/api/chatbot', { keyword: userMessage });
+            // ✅ Gunakan API dari .env
+            const res = await axios.post(`${API}/api/chatbot`, { keyword: userMessage });
             const botResponseText = res.data.jawaban;
 
             setChatHistory(prev => [...prev, { type: 'bot', text: botResponseText }]);
         } catch (error) {
-            console.error('Error fetching chatbot response:', error);
-            setChatHistory(prev => [...prev, { type: 'bot', text: "Maaf, terjadi kesalahan saat berkomunikasi dengan chatbot. Mohon coba lagi nanti." }]);
+            console.error('❌ Error fetching chatbot response:', error);
+            setChatHistory(prev => [...prev, { type: 'bot', text: "❌ Terjadi kesalahan saat berkomunikasi dengan chatbot. Mohon coba lagi nanti." }]);
         } finally {
             setChatLoading(false);
         }
@@ -115,13 +123,16 @@ export default function ChatbotSidebar({
             if (geoResult) {
                 setSearchedLocation(geoResult);
                 setMyLocation(null);
-                setChatHistory(prev => [...prev, { type: 'bot', text: `📍 Lokasi "${geoResult.name}" ditemukan. (Lat: ${geoResult.lat.toFixed(4)}, Lon: ${geoResult.lon.toFixed(4)})` }]);
+                setChatHistory(prev => [...prev, {
+                    type: 'bot',
+                    text: `📍 Lokasi "${geoResult.name}" ditemukan. (Lat: ${geoResult.lat.toFixed(4)}, Lon: ${geoResult.lon.toFixed(4)})`
+                }]);
             } else {
                 setChatHistory(prev => [...prev, { type: 'bot', text: `❌ Lokasi "${locationToSearch}" tidak ditemukan. Coba nama lokasi yang lebih spesifik.` }]);
             }
         } catch (error) {
             console.error('Error geocoding location:', error);
-            setChatHistory(prev => [...prev, { type: 'bot', text: "Terjadi kesalahan saat mencari lokasi. Mohon coba lagi." }]);
+            setChatHistory(prev => [...prev, { type: 'bot', text: "❌ Terjadi kesalahan saat mencari lokasi. Mohon coba lagi." }]);
         } finally {
             setChatLoading(false);
         }
@@ -154,45 +165,19 @@ export default function ChatbotSidebar({
                 <h1 className="app-title">Wargabantuin</h1>
                 {showMainApp && (
                     <div className="header-buttons">
-                        
-                        <motion.button
-                            onClick={() => handleFindMe()}
-                            className="find-me-button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
+                        <motion.button onClick={() => handleFindMe()} className="find-me-button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             📍 Temukan Saya
                         </motion.button>
-                        <motion.button
-                            onClick={handleClearChat}
-                            className="clear-chat-button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
+                        <motion.button onClick={handleClearChat} className="clear-chat-button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             🧹 Hapus Chat
                         </motion.button>
-                        <motion.button
-                            onClick={() => navigate("/map")}
-                            className="report-button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
+                        <motion.button onClick={() => navigate("/map")} className="report-button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             🗺️ Wargabantuin Peta
                         </motion.button>
-                        <motion.button
-                            onClick={() => navigate("/description")}
-                            className="report-button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
+                        <motion.button onClick={() => navigate("/description")} className="report-button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             📄 Wargabantuin Tentang
                         </motion.button>
-                        <motion.button
-                            onClick={() => navigate("/logout")}
-                            className="exit-button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                        >
+                        <motion.button onClick={() => navigate("/logout")} className="exit-button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             🚪 Keluar
                         </motion.button>
                     </div>
@@ -208,12 +193,7 @@ export default function ChatbotSidebar({
                         onChange={(e) => setSearchLocationInput(e.target.value)}
                         disabled={chatLoading || showWelcomeOverlay}
                     />
-                    <motion.button
-                        type="submit"
-                        disabled={chatLoading || showWelcomeOverlay}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                    >
+                    <motion.button type="submit" disabled={chatLoading || showWelcomeOverlay} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                         Temukan
                     </motion.button>
                 </form>
@@ -258,12 +238,7 @@ export default function ChatbotSidebar({
                     }}
                     disabled={chatLoading || showWelcomeOverlay}
                 />
-                <motion.button
-                    type="submit"
-                    disabled={chatLoading || showWelcomeOverlay}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
+                <motion.button type="submit" disabled={chatLoading || showWelcomeOverlay} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                     Kirim
                 </motion.button>
             </form>
