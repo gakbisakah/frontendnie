@@ -43,37 +43,54 @@ export default function MapComponent({
   // State untuk nearestData dari searchedLocation
   const [searchedNearestData, setSearchedNearestData] = useState(null);
 
-  // Fetch nearest location saat myLocation berubah
-  useEffect(() => {
-    if (myLocation) {
-      const fetchNearest = async () => {
-        try {
-          const res = await fetch(`/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`);
-          const data = await res.json();
-          setNearestData(data);
-        } catch (error) {
-          console.error('❌ Error fetching nearest location for myLocation:', error);
-        }
-      };
-      fetchNearest();
-    }
-  }, [myLocation]);
+// Untuk myLocation
+useEffect(() => {
+  if (myLocation) {
+    const fetchNearest = async () => {
+      try {
+        const res = await fetch(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`);
+        const contentType = res.headers.get("content-type");
 
-  // Fetch nearest location saat searchedLocation berubah
-  useEffect(() => {
-    if (searchedLocation) {
-      const fetchSearchedNearest = async () => {
-        try {
-          const res = await fetch(`/api/nearest-location?lat=${searchedLocation.lat}&lon=${searchedLocation.lon}`);
-          const data = await res.json();
-          setSearchedNearestData(data);
-        } catch (error) {
-          console.error('❌ Error fetching nearest location for searchedLocation:', error);
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text(); // baca isi response jika bukan JSON
+          throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
         }
-      };
-      fetchSearchedNearest();
-    }
-  }, [searchedLocation]);
+
+        const data = await res.json();
+        setNearestData(data);
+      } catch (error) {
+        console.error('❌ Error fetching nearest location for myLocation:', error);
+      }
+    };
+    fetchNearest();
+  }
+}, [myLocation]);
+
+// Untuk searchedLocation
+useEffect(() => {
+  if (searchedLocation) {
+    const fetchSearchedNearest = async () => {
+      try {
+        const res = await fetch(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${searchedLocation.lat}&lon=${searchedLocation.lon}`);
+        const contentType = res.headers.get("content-type");
+
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text();
+          throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
+        }
+
+        const data = await res.json();
+        setSearchedNearestData(data);
+      } catch (error) {
+        console.error('❌ Error fetching nearest location for searchedLocation:', error);
+      }
+    };
+    fetchSearchedNearest();
+  }
+}, [searchedLocation]);
+
 
   return (
     <div className="map-container">
