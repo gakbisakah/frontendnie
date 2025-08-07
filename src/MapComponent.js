@@ -495,7 +495,7 @@ export default function MapComponent({
         fontSize: '11px',
         zIndex: 1000
       }}>
-        🌐 Server: bisakah.pythonanywhere.com
+
       </div>
     </div>
   );
