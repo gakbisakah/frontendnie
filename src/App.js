@@ -21,6 +21,7 @@ export default function App() {
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
 
     const [allLokasi, setAllLokasi] = useState([]);
+    const [allLaporan, setAllLaporan] = useState([]);
     const [mapType, setMapType] = useState('standard');
     const [myLocation, setMyLocation] = useState(null);
     const [searchedLocation, setSearchedLocation] = useState(null);
@@ -87,7 +88,26 @@ export default function App() {
         return () => clearInterval(interval);
     }, [showMainApp, API]);
 
+    useEffect(() => {
+        if (!showMainApp) return;
 
+        const fetchAllLaporan = async () => {
+            try {
+                const res = await axios.get(`${API}/api/all_laporan`);
+                if (res.status === 200) {
+                    setAllLaporan(res.data.laporan || []);
+                } else {
+                    console.warn("⚠️ Tidak bisa mengambil laporan. Status:", res.status);
+                }
+            } catch (e) {
+                console.error('❌ Gagal fetch laporan dari API:', e.message || e);
+            }
+        };
+
+        fetchAllLaporan();
+        const interval = setInterval(fetchAllLaporan, 10000);
+        return () => clearInterval(interval);
+    }, [showMainApp, API]);
 
     const handleFindMe = useCallback((isBotInitiated = false) => {
         if ("geolocation" in navigator) {
@@ -183,7 +203,7 @@ export default function App() {
                                         myLocation={myLocation}
                                         searchedLocation={searchedLocation}
                                         allLokasi={allLokasi}
-    
+                                        allLaporan={allLaporan}
                                         mapType={mapType}
                                         setMapType={setMapType}
                                         initialMapCenter={initialMapCenter}
@@ -200,7 +220,7 @@ export default function App() {
                             setReportData={setReportData}
                             geocodeLocation={geocodeLocation}
                             initialMapCenter={initialMapCenter}
-            
+                            setAllLaporan={setAllLaporan}
                         />
                     </>
                 } />
@@ -210,6 +230,7 @@ export default function App() {
                         myLocation={myLocation}
                         searchedLocation={searchedLocation}
                         allLokasi={allLokasi}
+                        allLaporan={allLaporan}
                         mapType={mapType}
                         setMapType={setMapType}
                         initialMapCenter={initialMapCenter}
