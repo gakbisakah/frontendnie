@@ -200,7 +200,7 @@ export default function App() {
                             setReportData={setReportData}
                             geocodeLocation={geocodeLocation}
                             initialMapCenter={initialMapCenter}
-                            setAllLaporan={setAllLaporan}
+            
                         />
                     </>
                 } />
