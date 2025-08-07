@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +21,6 @@ export default function App() {
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
 
     const [allLokasi, setAllLokasi] = useState([]);
-    const [allLaporan, setAllLaporan] = useState([]);
     const [mapType, setMapType] = useState('standard');
     const [myLocation, setMyLocation] = useState(null);
     const [searchedLocation, setSearchedLocation] = useState(null);
@@ -38,7 +37,6 @@ export default function App() {
 
     const [searchLocationInput, setSearchLocationInput] = useState('');
 
-    // ✅ Log detail penggunaan API
     useEffect(() => {
         console.log("🌐 REACT_APP_BACKEND_URL:", process.env.REACT_APP_BACKEND_URL);
         console.log("📡 API yang digunakan:", API);
@@ -88,26 +86,20 @@ export default function App() {
         return () => clearInterval(interval);
     }, [showMainApp, API]);
 
-    useEffect(() => {
-        if (!showMainApp) return;
-
-        const fetchAllLaporan = async () => {
-            try {
-                const res = await axios.get(`${API}/api/all_laporan`);
-                if (res.status === 200) {
-                    setAllLaporan(res.data.laporan || []);
-                } else {
-                    console.warn("⚠️ Tidak bisa mengambil laporan. Status:", res.status);
-                }
-            } catch (e) {
-                console.error('❌ Gagal fetch laporan dari API:', e.message || e);
+    const fetchNearestLocation = async (lat, lon) => {
+        try {
+            const res = await axios.get(`${API}/api/nearest-location`, {
+                params: { lat, lon }
+            });
+            if (res.data) {
+                console.log("📍 Lokasi terdekat:", res.data.terdekat);
+                console.log("🌿 Rekomendasi hewan:", res.data.rekomendasi_hewan);
+                console.log("🥬 Rekomendasi sayur:", res.data.rekomendasi_sayur);
             }
-        };
-
-        fetchAllLaporan();
-        const interval = setInterval(fetchAllLaporan, 10000);
-        return () => clearInterval(interval);
-    }, [showMainApp, API]);
+        } catch (error) {
+            console.error("❌ Gagal fetch lokasi terdekat:", error.message || error);
+        }
+    };
 
     const handleFindMe = useCallback((isBotInitiated = false) => {
         if ("geolocation" in navigator) {
@@ -124,6 +116,7 @@ export default function App() {
                     setSearchedLocation(null);
                     setChatHistory(prev => [...prev, { type: 'bot', text: "📍 Lokasi kamu sudah ditemukan!" }]);
                     setChatLoading(false);
+                    fetchNearestLocation(userLat, userLon); // Panggil API lokasi terdekat
                 },
                 err => {
                     console.error("Gagal mengambil lokasi:", err);
@@ -136,7 +129,7 @@ export default function App() {
             setChatHistory(prev => [...prev, { type: 'bot', text: "Peramban Anda tidak mendukung geolokasi." }]);
             setChatLoading(false);
         }
-    }, []);
+    }, [fetchNearestLocation]);
 
     const handleStartApp = () => {
         setShowWelcomeOverlay(true);
@@ -203,7 +196,6 @@ export default function App() {
                                         myLocation={myLocation}
                                         searchedLocation={searchedLocation}
                                         allLokasi={allLokasi}
-                                        allLaporan={allLaporan}
                                         mapType={mapType}
                                         setMapType={setMapType}
                                         initialMapCenter={initialMapCenter}
@@ -220,7 +212,7 @@ export default function App() {
                             setReportData={setReportData}
                             geocodeLocation={geocodeLocation}
                             initialMapCenter={initialMapCenter}
-                            setAllLaporan={setAllLaporan}
+                            setAllLaporan={() => {}} // bisa dikosongkan atau sesuaikan
                         />
                     </>
                 } />
@@ -230,7 +222,6 @@ export default function App() {
                         myLocation={myLocation}
                         searchedLocation={searchedLocation}
                         allLokasi={allLokasi}
-                        allLaporan={allLaporan}
                         mapType={mapType}
                         setMapType={setMapType}
                         initialMapCenter={initialMapCenter}
