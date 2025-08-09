@@ -43,42 +43,28 @@ export default function MapComponent({
   // State untuk nearestData dari searchedLocation
   const [searchedNearestData, setSearchedNearestData] = useState(null);
 
+  // Fetch nearest location saat myLocation berubah
   useEffect(() => {
     if (myLocation) {
       const fetchNearest = async () => {
         try {
-          const res = await fetch(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`);
-          const text = await res.text();
-
-          try {
-            const json = JSON.parse(text);
-            setNearestData(json);
-          } catch (parseError) {
-            console.error('❌ Gagal parse JSON:', parseError);
-            console.warn('📦 Response yang diterima (bukan JSON):', text);
-          }
+          const res = await fetch(`/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`);
+          const data = await res.json();
+          setNearestData(data);
         } catch (error) {
-          console.error('❌ Error fetch dari API:', error);
+          console.error('❌ Error fetching nearest location for myLocation:', error);
         }
       };
       fetchNearest();
     }
   }, [myLocation]);
 
-  // Untuk searchedLocation
+  // Fetch nearest location saat searchedLocation berubah
   useEffect(() => {
     if (searchedLocation) {
       const fetchSearchedNearest = async () => {
         try {
-          const res = await fetch(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${searchedLocation.lat}&lon=${searchedLocation.lon}`);
-          const contentType = res.headers.get("content-type");
-
-          if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-          if (!contentType || !contentType.includes("application/json")) {
-            const text = await res.text();
-            throw new Error(`Invalid JSON response: ${text.substring(0, 100)}...`);
-          }
-
+          const res = await fetch(`/api/nearest-location?lat=${searchedLocation.lat}&lon=${searchedLocation.lon}`);
           const data = await res.json();
           setSearchedNearestData(data);
         } catch (error) {
@@ -108,81 +94,90 @@ export default function MapComponent({
         }
 
         {/* --- Marker lokasi yang dicari dengan data dari nearestLocation API --- */}
-        {searchedLocation && searchedNearestData && (
-          <Marker position={[searchedLocation.lat, searchedLocation.lon]} icon={blueIcon}>
-            <Popup>
-              <div className="popup-content-scrollable" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                Lokasi terdekat: {searchedNearestData.lokasi_terdekat?.desa || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kecamatan || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kotkab || 'N/A'}, {searchedNearestData.lokasi_terdekat?.provinsi || 'N/A'}
-                <br /><br />
-                <b>Data Cuaca</b><br />
-                🌡 Suhu Saat Ini: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.suhu != null ? `${searchedNearestData.lokasi_terdekat.cuaca_saat_ini.suhu}°C` : 'N/A'}<br />
-                💧 Kelembapan Saat Ini: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.kelembapan != null ? `${searchedNearestData.lokasi_terdekat.cuaca_saat_ini.kelembapan}%` : 'N/A'}<br />
-                ☁️ Kondisi Cuaca: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br /><br />
+      {/* --- Marker lokasi yang dicari dengan data dari nearestLocation API --- */}
+{searchedLocation && searchedNearestData && (
+<Marker position={[searchedLocation.lat, searchedLocation.lon]} icon={blueIcon}>
+<Popup>
+<div className="popup-content-scrollable" style={{ maxHeight: '250px', overflowY: 'auto' }}>
+Lokasi terdekat: {searchedNearestData.lokasi_terdekat?.desa || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kecamatan || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kotkab || 'N/A'}, {searchedNearestData.lokasi_terdekat?.provinsi || 'N/A'}
+<br /><br />
+<b>Data Cuaca</b><br />
+🌡 Suhu Saat Ini: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.suhu != null ? `${searchedNearestData.lokasi_terdekat.cuaca_saat_ini.suhu}°C` : 'N/A'}<br />
+💧 Kelembapan Saat Ini: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.kelembapan != null ? `${searchedNearestData.lokasi_terdekat.cuaca_saat_ini.kelembapan}%` : 'N/A'}<br />
+☁️ Kondisi Cuaca: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br /><br />
+ 
 
-                <b>Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)</b><br />
-                {searchedNearestData.rekomendasi?.hewan?.length > 0
-                  ? <>{searchedNearestData.rekomendasi.hewan.join(', ')}<br /></>
-                  : 'Tidak ada data'}<br />
+<b>Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)</b><br />
+{searchedNearestData.rekomendasi?.hewan?.length > 0
+? <>{searchedNearestData.rekomendasi.hewan.join(', ')}<br /></>
+: 'Tidak ada data'}<br />
+ 
+<b>Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)</b><br />
+{searchedNearestData.rekomendasi?.sayuran?.length > 0
+? <>{searchedNearestData.rekomendasi.sayuran.join(', ')}<br /></>
+: 'Tidak ada data'}<br /><br />
+ 
+<b>Penilaian Lengkap</b><br />
+🐄 Hewan:<br />
+{(searchedNearestData.penilaian?.hewan || []).length > 0
+? (searchedNearestData.penilaian.hewan.map((item, idx) => (
+<span key={`hewan-${idx}`}>
+- {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}, Alasan: {item.alasan_skor || 'N/A'})<br />
+</span>
+)))
+: 'Tidak ada'}<br />
+ 
+🥬 Sayuran:<br />
+{(searchedNearestData.penilaian?.sayuran || []).length > 0
+? (searchedNearestData.penilaian.sayuran.map((item, idx) => (
+<span key={`sayuran-${idx}`}>
+- {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}, Alasan: {item.alasan_skor || 'N/A'})<br />
+</span>
+)))
+: 'Tidak ada'}
+</div>
+</Popup>
+</Marker>
+)}
 
-                <b>Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)</b><br />
-                {searchedNearestData.rekomendasi?.sayuran?.length > 0
-                  ? <>{searchedNearestData.rekomendasi.sayuran.join(', ')}<br /></>
-                  : 'Tidak ada data'}<br /><br />
-
-                <b>Penilaian Lengkap</b><br />
-                🐄 Hewan:<br />
-                {(searchedNearestData.penilaian?.hewan || []).length > 0
-                  ? (searchedNearestData.penilaian.hewan.map((item, idx) => (
-                    <span key={`hewan-${idx}`}>
-                      - {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}, Alasan: {item.alasan_skor || 'N/A'})<br />
-                    </span>
-                  )))
-                  : 'Tidak ada'}<br />
-
-                🥬 Sayuran:<br />
-                {(searchedNearestData.penilaian?.sayuran || []).length > 0
-                  ? (searchedNearestData.penilaian.sayuran.map((item, idx) => (
-                    <span key={`sayuran-${idx}`}>
-                      - {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}, Alasan: {item.alasan_skor || 'N/A'})<br />
-                    </span>
-                  )))
-                  : 'Tidak ada'}
-              </div>
-            </Popup>
-          </Marker>
-        )}
-
-        {/* --- Marker semua lokasi dengan popup lengkap (DIPERBAIKI) --- */}
+        {/* --- Marker semua lokasi dengan popup lengkap (tidak dihapus) --- */}
         {allLokasi.filter(r => r.lat != null && r.lon != null).map((r, i) => (
-          <Marker key={r.adm4 || `lokasi-${i}`} position={[r.lat, r.lon]} icon={getWeatherIcon(r.cuaca_saat_ini?.ikon)}>
+          <Marker key={r.adm4 || `lokasi-${i}`} position={[r.lat, r.lon]} icon={getWeatherIcon(r.weather_icon_url)}>
             <Popup>
               <div className="popup-content-scrollable">
                 📍 Lokasi: {r.desa || 'N/A'}, {r.kecamatan || 'N/A'}, {r.kotkab || 'N/A'}, {r.provinsi || 'N/A'}
                 <br /><br />
-                <b>Data Cuaca</b><br />
-                🌡 Suhu Saat Ini: {r.cuaca_saat_ini?.suhu != null ? `${r.cuaca_saat_ini.suhu}°C` : 'N/A'}<br />
-                💧 Kelembapan Saat Ini: {r.cuaca_saat_ini?.kelembapan != null ? `${r.cuaca_saat_ini.kelembapan}%` : 'N/A'}<br />
-                ☁️ Kondisi Cuaca: {r.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br /><br />
-                
-                📅 Suhu Harian:<br />
-                – Rata-rata: {r.ringkasan_harian?.t_avg != null ? `${r.ringkasan_harian.t_avg}°C` : 'N/A'}<br />
-                – Maksimum: {r.ringkasan_harian?.t_max != null ? `${r.ringkasan_harian.t_max}°C` : 'N/A'}<br />
-                – Minimum: {r.ringkasan_harian?.t_min != null ? `${r.ringkasan_harian.t_min}°C` : 'N/A'}<br /><br />
-                
-                <b>Rekomendasi & Penilaian</b><br/>
+                🌡 Suhu Saat Ini: {r.suhu_realtime != null && r.suhu_realtime !== "N/A" ? `${r.suhu_realtime}°C` : 'N/A'}<br />
+                💧 Kelembapan Saat Ini: {r.kelembapan_realtime != null && r.kelembapan_realtime !== "N/A" ? `${r.kelembapan_realtime}%` : 'N/A'}<br />
+                ☁️ Kondisi Cuaca: {r.weather_desc || 'Tidak ada data'}<br /><br />
+                📅 Suhu Hari Ini:<br />
+                – Rata-rata: {r.suhu_hari_ini?.rata2 != null ? `${r.suhu_hari_ini.rata2}°C` : 'N/A'}<br />
+                – Maksimum: {r.suhu_hari_ini?.max != null ? `${r.suhu_hari_ini.max}°C` : 'N/A'}<br />
+                – Minimum: {r.suhu_hari_ini?.min != null ? `${r.suhu_hari_ini.min}°C` : 'N/A'}<br /><br />
+                📊Periode Rata-rata (mingguan/bulanan):<br />
+                🌡 Suhu rata-rata periode: {r.rata2_suhu != null ? `${r.rata2_suhu}°C` : 'N/A'}<br />
+                💧 Kelembapan rata-rata periode: {r.rata2_hu != null ? `${r.rata2_hu}%` : 'N/A'}<br /><br />
+                🐄 Rekomendasi Hewan<br />✅ Sangat Cocok (Skor diatas 70 ) <br />
+                {r.pilihan_tepat?.hewan?.length > 0 ? <>{r.pilihan_tepat.hewan.join(', ')}<br /></> : '🐄 Hewan: Tidak ada data'}<br />
+                🥬 Rekomendasi Sayuran<br />✅ Sangat Cocok (Skor diatas 70 ) <br />
+                {r.pilihan_tepat?.sayuran?.length > 0 ? <>{r.pilihan_tepat.sayuran.join(', ')}<br /></> : '🥬 Sayuran: Tidak ada data'}<br /><br />
+                <b>Penilaian:</b><br />
                 🐄 Hewan:<br />
-                {(r.rekomendasi?.hewan || []).length > 0
-                  ? r.rekomendasi.hewan.map((item, idx) => (
-                    <span key={`rec-hewan-${idx}`}> - {item} <br /></span>
-                  ))
-                  : 'Tidak ada data'}<br/>
-
+                {(r.cocok_untuk?.hewan || []).length > 0
+                  ? (r.cocok_untuk.hewan.map((item, idx) => (
+                    <span key={`hewan-${idx}`}>
+                      - {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}{item.alasan_skor ? `, ${item.alasan_skor}` : ''})<br />
+                    </span>
+                  )))
+                  : 'Tidak ada'}<br />
                 🥬 Sayuran:<br />
-                {(r.rekomendasi?.sayuran || []).length > 0
-                  ? r.rekomendasi.sayuran.map((item, idx) => (
-                    <span key={`rec-sayuran-${idx}`}> - {item} <br /></span>
-                  ))
-                  : 'Tidak ada data'}
+                {(r.cocok_untuk?.sayuran || []).length > 0
+                  ? (r.cocok_untuk.sayuran.map((item, idx) => (
+                    <span key={`sayuran-${idx}`}>
+                      - {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}{item.alasan_skor ? `, ${item.alasan_skor}` : ''})<br />
+                    </span>
+                  )))
+                  : 'Tidak ada'}<br />
               </div>
             </Popup>
           </Marker>
@@ -192,10 +187,10 @@ export default function MapComponent({
         {allLaporan.filter(lap => lap.lat != null && lap.lon != null).map((lap, idx) => (
           <Marker key={`lap-${lap.waktu}-${idx}`} position={[lap.lat, lap.lon]} icon={greenIcon}>
             <Popup>
-              📍 <b>{lap.lokasi || 'Lokasi Tidak Diketahui'}</b><br />
-              🗑 Kategori: {lap.kategori || '-'}<br />
-              🕒 Waktu: {new Date(lap.waktu).toLocaleString()}<br />
-              📞 Kontak: {lap.kontak || '-'}<br />
+              📍 <b>{lap.lokasi || 'Lokasi Tidak Diketahui'}</b><br/>
+              🗑 Kategori: {lap.kategori || '-'}<br/>
+              🕒 Waktu: {new Date(lap.waktu).toLocaleString()}<br/>
+              📞 Kontak: {lap.kontak || '-'}<br/>
               📝 Deskripsi: {lap.deskripsi || '-'}
             </Popup>
           </Marker>
@@ -261,16 +256,16 @@ export default function MapComponent({
               </div>
               <Popup>
                 <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                  📍 Ini lokasi kamu sekarang<br />
-                  <b>Latitude:</b> {myLocation.lat}<br />
-                  <b>Longitude:</b> {myLocation.lon}<br /><br />
+                  📍 Ini lokasi kamu sekarang<br/>
+                  <b>Latitude:</b> {myLocation.lat}<br/>
+                  <b>Longitude:</b> {myLocation.lon}<br/><br/>
                   {nearestData?.lokasi_terdekat && (
                     <>
-                      🌏 <b>Lokasi Terdekat:</b> {nearestData.lokasi_terdekat.desa}, {nearestData.lokasi_terdekat.kecamatan}, {nearestData.lokasi_terdekat.kotkab}, {nearestData.lokasi_terdekat.provinsi}<br /><br />
-                      🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.suhu ?? 'N/A'}°C<br />
-                      💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.kelembapan ?? 'N/A'}%<br />
-                      ☁️ Cuaca: {nearestData.lokasi_terdekat.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br /><br />
-                      🐄 <b>Penilaian Hewan (Skor ≥ 70):</b><br />
+                      🌏 <b>Lokasi Terdekat:</b> {nearestData.lokasi_terdekat.desa}, {nearestData.lokasi_terdekat.kecamatan}, {nearestData.lokasi_terdekat.kotkab}, {nearestData.lokasi_terdekat.provinsi}<br/><br/>
+                      🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.suhu ?? 'N/A'}°C<br/>
+                      💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.kelembapan ?? 'N/A'}%<br/>
+                      ☁️ Cuaca: {nearestData.lokasi_terdekat.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br/><br/>
+                      🐄 <b>Penilaian Hewan (Skor ≥ 70):</b><br/>
                       {(nearestData.penilaian?.hewan || []).filter(h => h.skor >= 70).length > 0
                         ? (
                           nearestData.penilaian.hewan
@@ -280,9 +275,9 @@ export default function MapComponent({
                                 {h.nama} (Skor: {h.skor}, Alasan: {h.alasan_skor}){idx < arr.length - 1 ? ', ' : ''}
                               </span>
                             ))
-                        )
-                        : 'Tidak ada yang sangat cocok'}<br /><br />
-                      🥬 <b>Penilaian Sayuran (Skor ≥ 70):</b><br />
+                          )
+                        : 'Tidak ada yang sangat cocok'}<br/><br/>
+                      🥬 <b>Penilaian Sayuran (Skor ≥ 70):</b><br/>
                       {(nearestData.penilaian?.sayuran || []).filter(s => s.skor >= 70).length > 0
                         ? (
                           nearestData.penilaian.sayuran
@@ -292,7 +287,7 @@ export default function MapComponent({
                                 {s.nama} (Skor: {s.skor}, Alasan: {s.alasan_skor}){idx < arr.length - 1 ? ', ' : ''}
                               </span>
                             ))
-                        )
+                          )
                         : 'Tidak ada yang sangat cocok'}
                     </>
                   )}

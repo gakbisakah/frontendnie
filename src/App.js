@@ -2,20 +2,22 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom'; // ✅ tambahkan ini
 import 'leaflet/dist/leaflet.css';
 
+// Import CSS files
 import './styles/App.css';
 import './styles/MapComponents.css';
 import './styles/ProjectDescription.css';
 
+// Import the new components
 import MapComponent from './MapComponent';
 import ChatbotSidebar from './ChatbotSidebar';
 import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-    const API = process.env.REACT_APP_BACKEND_URL || 'https://bisakah.pythonanywhere.com';
+    const API = process.env.REACT_APP_BACKEND_URL || '';
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
@@ -38,12 +40,6 @@ export default function App() {
 
     const [searchLocationInput, setSearchLocationInput] = useState('');
 
-    // ✅ Log detail penggunaan API
-    useEffect(() => {
-        console.log("🌐 REACT_APP_BACKEND_URL:", process.env.REACT_APP_BACKEND_URL);
-        console.log("📡 API yang digunakan:", API);
-    }, []);
-
     const geocodeLocation = async (locationName) => {
         try {
             const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
@@ -61,7 +57,7 @@ export default function App() {
             }
             return null;
         } catch (error) {
-            console.error('❌ Error geocoding location:', error);
+            console.error('Error geocoding location:', error);
             return null;
         }
     };
@@ -72,14 +68,10 @@ export default function App() {
         const fetchAllLokasi = async () => {
             try {
                 const res = await axios.get(`${API}/api/all`);
-                if (res.status === 200) {
-                    setAllLokasi(res.data.lokasi || []);
-                } else {
-                    console.warn("⚠️ Tidak bisa mengambil lokasi. Status:", res.status);
-                }
+                setAllLokasi(res.data.lokasi || []);
             } catch (e) {
-                console.error('❌ Gagal fetch lokasi dari API:', e.message || e);
-                setChatHistory(prev => [...prev, { type: 'bot', text: "❌ Gagal terhubung ke server lokasi." }]);
+                console.error('Gagal fetch lokasi:', e);
+                setChatHistory(prev => [...prev, { type: 'bot', text: "offline" }]);
             }
         };
 
@@ -94,13 +86,9 @@ export default function App() {
         const fetchAllLaporan = async () => {
             try {
                 const res = await axios.get(`${API}/api/all_laporan`);
-                if (res.status === 200) {
-                    setAllLaporan(res.data.laporan || []);
-                } else {
-                    console.warn("⚠️ Tidak bisa mengambil laporan. Status:", res.status);
-                }
+                setAllLaporan(res.data.laporan || []);
             } catch (e) {
-                console.error('❌ Gagal fetch laporan dari API:', e.message || e);
+                console.error('Gagal fetch laporan:', e);
             }
         };
 
@@ -150,12 +138,26 @@ export default function App() {
     const initialMapZoom = 5;
 
     return (
-        <BrowserRouter>
+        <BrowserRouter> {/* ✅ tambahkan wrapper Router */}
             <AnimatePresence>
                 {showWelcomeOverlay && (
-                    <motion.div className="welcome-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}>
-                        <motion.div className="welcome-overlay-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5 }}></motion.div>
-                        <motion.div className="welcome-message"
+                    <motion.div
+                        className="welcome-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <motion.div
+                            className="welcome-overlay-backdrop"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                        ></motion.div>
+
+                        <motion.div
+                            className="welcome-message"
                             initial={{ scale: 0.7, opacity: 0, y: 50 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.7, opacity: 0, y: -50 }}
@@ -172,7 +174,7 @@ export default function App() {
                 )}
             </AnimatePresence>
 
-            <Routes>
+            <Routes> {/* ✅ tambahkan ini */}
                 <Route path="/" element={
                     <>
                         <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
@@ -224,19 +226,21 @@ export default function App() {
                         />
                     </>
                 } />
-
-                <Route path="/map" element={
-                    <MapComponent
-                        myLocation={myLocation}
-                        searchedLocation={searchedLocation}
-                        allLokasi={allLokasi}
-                        allLaporan={allLaporan}
-                        mapType={mapType}
-                        setMapType={setMapType}
-                        initialMapCenter={initialMapCenter}
-                        initialMapZoom={initialMapZoom}
-                    />
-                } />
+              <Route 
+  path="/map" 
+  element={
+    <MapComponent
+      myLocation={myLocation}
+      searchedLocation={searchedLocation}
+      allLokasi={allLokasi}
+      allLaporan={allLaporan}
+      mapType={mapType}
+      setMapType={setMapType}
+      initialMapCenter={initialMapCenter}
+      initialMapZoom={initialMapZoom}
+    />
+  }
+/>
 
                 <Route path="/description" element={<ProjectDescription />} />
                 <Route path="/logout" element={<div style={{ padding: '2rem' }}>✅ Kamu sudah logout.</div>} />
