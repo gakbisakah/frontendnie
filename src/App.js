@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrowserRouter, Routes, Route } from 'react-router-dom'; // ✅ tambahkan ini
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 
 // Import CSS files
@@ -17,7 +17,8 @@ import ReportModal from './ReportModal';
 import ProjectDescription from './ProjectDescription';
 
 export default function App() {
-    const API = process.env.REACT_APP_BACKEND_URL || '';
+    // Pastikan variabel lingkungan ini sudah diatur di Vercel
+    const API = process.env.REACT_APP_BACKEND_URL || 'https://bisakah.pythonanywhere.com';
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
@@ -62,42 +63,44 @@ export default function App() {
         }
     };
 
+    const fetchAllLokasi = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API}/api/all`);
+            setAllLokasi(res.data.lokasi || []);
+        } catch (e) {
+            console.error('Gagal fetch lokasi:', e);
+            // Memberikan pesan error yang lebih jelas kepada pengguna
+            // setChatHistory(prev => [...prev, { type: 'bot', text: "❌ Gagal terhubung ke server untuk data lokasi. Coba periksa koneksi Anda." }]);
+        }
+    }, [API]);
+
+    const fetchAllLaporan = useCallback(async () => {
+        try {
+            const res = await axios.get(`${API}/api/all_laporan`);
+            setAllLaporan(res.data.laporan || []);
+        } catch (e) {
+            console.error('Gagal fetch laporan:', e);
+            // Memberikan pesan error yang lebih jelas kepada pengguna
+            // setChatHistory(prev => [...prev, { type: 'bot', text: "❌ Gagal terhubung ke server untuk data laporan." }]);
+        }
+    }, [API]);
+
     useEffect(() => {
         if (!showMainApp) return;
-
-        const fetchAllLokasi = async () => {
-            try {
-                const res = await axios.get(`${API}/api/all`);
-                setAllLokasi(res.data.lokasi || []);
-            } catch (e) {
-                console.error('Gagal fetch lokasi:', e);
-                setChatHistory(prev => [...prev, { type: 'bot', text: "offline" }]);
-            }
-        };
 
         fetchAllLokasi();
-        const interval = setInterval(fetchAllLokasi, 10000);
-        return () => clearInterval(interval);
-    }, [showMainApp, API]);
-
-    useEffect(() => {
-        if (!showMainApp) return;
-
-        const fetchAllLaporan = async () => {
-            try {
-                const res = await axios.get(`${API}/api/all_laporan`);
-                setAllLaporan(res.data.laporan || []);
-            } catch (e) {
-                console.error('Gagal fetch laporan:', e);
-            }
-        };
-
         fetchAllLaporan();
-        const interval = setInterval(fetchAllLaporan, 10000);
-        return () => clearInterval(interval);
-    }, [showMainApp, API]);
 
-    const handleFindMe = useCallback((isBotInitiated = false) => {
+        const intervalLokasi = setInterval(fetchAllLokasi, 30000); // Fetch every 30 seconds
+        const intervalLaporan = setInterval(fetchAllLaporan, 30000); // Fetch every 30 seconds
+
+        return () => {
+            clearInterval(intervalLokasi);
+            clearInterval(intervalLaporan);
+        };
+    }, [showMainApp, fetchAllLokasi, fetchAllLaporan]);
+
+    const handleFindMe = useCallback(async (isBotInitiated = false) => {
         if ("geolocation" in navigator) {
             setChatLoading(true);
             if (!isBotInitiated) {
@@ -105,13 +108,34 @@ export default function App() {
             }
 
             navigator.geolocation.getCurrentPosition(
-                pos => {
+                async pos => {
                     const userLat = pos.coords.latitude;
                     const userLon = pos.coords.longitude;
                     setMyLocation({ lat: userLat, lon: userLon });
                     setSearchedLocation(null);
-                    setChatHistory(prev => [...prev, { type: 'bot', text: "📍 Lokasi kamu sudah ditemukan!" }]);
-                    setChatLoading(false);
+                    setChatHistory(prev => [...prev, { type: 'bot', text: "📍 Lokasi kamu sudah ditemukan! Mencari rekomendasi..." }]);
+
+                    // Panggil endpoint backend untuk lokasi terdekat dan rekomendasi
+                    try {
+                        const res = await axios.get(`${API}/api/nearest-location?lat=${userLat}&lon=${userLon}`);
+                        const { lokasi_terdekat, rekomendasi } = res.data;
+                        let botMessage = `Lokasi terdekat dari Anda adalah **${lokasi_terdekat.nama_lokasi}**.`;
+                        if (rekomendasi.hewan.length > 0 || rekomendasi.sayuran.length > 0) {
+                            botMessage += `\n\n**Rekomendasi untuk Lokasi Terdekat:**\n`;
+                            if (rekomendasi.hewan.length > 0) {
+                                botMessage += `- Hewan: ${rekomendasi.hewan.join(', ')}\n`;
+                            }
+                            if (rekomendasi.sayuran.length > 0) {
+                                botMessage += `- Sayuran: ${rekomendasi.sayuran.join(', ')}\n`;
+                            }
+                        }
+                        setChatHistory(prev => [...prev, { type: 'bot', text: botMessage }]);
+                    } catch (apiError) {
+                        console.error('Gagal fetch rekomendasi:', apiError);
+                        setChatHistory(prev => [...prev, { type: 'bot', text: "⚠️ Gagal mendapatkan rekomendasi untuk lokasi Anda. Coba lagi nanti." }]);
+                    } finally {
+                        setChatLoading(false);
+                    }
                 },
                 err => {
                     console.error("Gagal mengambil lokasi:", err);
@@ -124,7 +148,7 @@ export default function App() {
             setChatHistory(prev => [...prev, { type: 'bot', text: "Peramban Anda tidak mendukung geolokasi." }]);
             setChatLoading(false);
         }
-    }, []);
+    }, [API]);
 
     const handleStartApp = () => {
         setShowWelcomeOverlay(true);
@@ -138,7 +162,7 @@ export default function App() {
     const initialMapZoom = 5;
 
     return (
-        <BrowserRouter> {/* ✅ tambahkan wrapper Router */}
+        <BrowserRouter>
             <AnimatePresence>
                 {showWelcomeOverlay && (
                     <motion.div
@@ -174,7 +198,7 @@ export default function App() {
                 )}
             </AnimatePresence>
 
-            <Routes> {/* ✅ tambahkan ini */}
+            <Routes>
                 <Route path="/" element={
                     <>
                         <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
@@ -226,22 +250,21 @@ export default function App() {
                         />
                     </>
                 } />
-              <Route 
-  path="/map" 
-  element={
-    <MapComponent
-      myLocation={myLocation}
-      searchedLocation={searchedLocation}
-      allLokasi={allLokasi}
-      allLaporan={allLaporan}
-      mapType={mapType}
-      setMapType={setMapType}
-      initialMapCenter={initialMapCenter}
-      initialMapZoom={initialMapZoom}
-    />
-  }
-/>
-
+                <Route
+                    path="/map"
+                    element={
+                        <MapComponent
+                            myLocation={myLocation}
+                            searchedLocation={searchedLocation}
+                            allLokasi={allLokasi}
+                            allLaporan={allLaporan}
+                            mapType={mapType}
+                            setMapType={setMapType}
+                            initialMapCenter={initialMapCenter}
+                            initialMapZoom={initialMapZoom}
+                        />
+                    }
+                />
                 <Route path="/description" element={<ProjectDescription />} />
                 <Route path="/logout" element={<div style={{ padding: '2rem' }}>✅ Kamu sudah logout.</div>} />
             </Routes>
