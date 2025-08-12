@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import L from 'leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // ✅ tambahkan Navigate
+import { BrowserRouter, Routes, Route } from 'react-router-dom'; // ✅ tambahkan ini
 import 'leaflet/dist/leaflet.css';
 
 // Import CSS files
@@ -18,6 +18,8 @@ import ProjectDescription from './ProjectDescription';
 
 export default function App() {
     const API = process.env.REACT_APP_BACKEND_URL || '';
+// API akan menjadi "https://bisakah.pythonanywhere.com"
+
 
     const [showMainApp, setShowMainApp] = useState(false);
     const [showWelcomeOverlay, setShowWelcomeOverlay] = useState(false);
@@ -39,13 +41,6 @@ export default function App() {
     });
 
     const [searchLocationInput, setSearchLocationInput] = useState('');
-
-    // ✅ Perubahan Android - Deteksi perangkat Android
-    const [isAndroid, setIsAndroid] = useState(false);
-    useEffect(() => {
-        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-        setIsAndroid(/android/i.test(userAgent));
-    }, []);
 
     const geocodeLocation = async (locationName) => {
         try {
@@ -145,16 +140,49 @@ export default function App() {
     const initialMapZoom = 5;
 
     return (
-        <BrowserRouter>
-            {/* ✅ Perubahan Android: jika Android, langsung render ChatbotSidebar penuh */}
-            {isAndroid ? (
-                <Routes>
-                    <Route
-                        path="*"
-                        element={
+        <BrowserRouter> {/* ✅ tambahkan wrapper Router */}
+            <AnimatePresence>
+                {showWelcomeOverlay && (
+                    <motion.div
+                        className="welcome-overlay"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <motion.div
+                            className="welcome-overlay-backdrop"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.5 }}
+                        ></motion.div>
+
+                        <motion.div
+                            className="welcome-message"
+                            initial={{ scale: 0.7, opacity: 0, y: 50 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.7, opacity: 0, y: -50 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 200,
+                                damping: 20,
+                                duration: 1.0
+                            }}
+                        >
+                            Selamat Datang di Wargabantuin
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <Routes> {/* ✅ tambahkan ini */}
+                <Route path="/" element={
+                    <>
+                        <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
                             <ChatbotSidebar
-                                showMainApp={true}
-                                showWelcomeOverlay={false}
+                                showMainApp={showMainApp}
+                                showWelcomeOverlay={showWelcomeOverlay}
                                 chatInput={chatInput}
                                 setChatInput={setChatInput}
                                 chatHistory={chatHistory}
@@ -169,117 +197,56 @@ export default function App() {
                                 setSearchLocationInput={setSearchLocationInput}
                                 setShowReportModal={setShowReportModal}
                                 handleStartApp={handleStartApp}
-                                myLocation={myLocation}
                             />
-                        }
-                    />
-                </Routes>
-            ) : (
-                <>
-                    <AnimatePresence>
-                        {showWelcomeOverlay && (
-                            <motion.div
-                                className="welcome-overlay"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.5 }}
-                            >
-                                <motion.div
-                                    className="welcome-overlay-backdrop"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.5 }}
-                                ></motion.div>
 
-                                <motion.div
-                                    className="welcome-message"
-                                    initial={{ scale: 0.7, opacity: 0, y: 50 }}
-                                    animate={{ scale: 1, opacity: 1, y: 0 }}
-                                    exit={{ scale: 0.7, opacity: 0, y: -50 }}
-                                    transition={{
-                                        type: "spring",
-                                        stiffness: 200,
-                                        damping: 20,
-                                        duration: 1.0
-                                    }}
-                                >
-                                    Selamat Datang di Wargabantuin
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    <Routes>
-                        <Route path="/" element={
-                            <>
-                                <div className={`main-container ${showWelcomeOverlay ? 'blur-background' : ''}`}>
-                                    <ChatbotSidebar
-                                        showMainApp={showMainApp}
-                                        showWelcomeOverlay={showWelcomeOverlay}
-                                        chatInput={chatInput}
-                                        setChatInput={setChatInput}
-                                        chatHistory={chatHistory}
-                                        setChatHistory={setChatHistory}
-                                        chatLoading={chatLoading}
-                                        setChatLoading={setChatLoading}
-                                        handleFindMe={handleFindMe}
-                                        geocodeLocation={geocodeLocation}
-                                        setSearchedLocation={setSearchedLocation}
-                                        setMyLocation={setMyLocation}
-                                        searchLocationInput={searchLocationInput}
-                                        setSearchLocationInput={setSearchLocationInput}
-                                        setShowReportModal={setShowReportModal}
-                                        handleStartApp={handleStartApp}
+                            <div className="right-content">
+                                {!showMainApp ? (
+                                    <ProjectDescription />
+                                ) : (
+                                    <MapComponent
+                                        myLocation={myLocation}
+                                        searchedLocation={searchedLocation}
+                                        allLokasi={allLokasi}
+                                        allLaporan={allLaporan}
+                                        mapType={mapType}
+                                        setMapType={setMapType}
+                                        initialMapCenter={initialMapCenter}
+                                        initialMapZoom={initialMapZoom}
                                     />
+                                )}
+                            </div>
+                        </div>
 
-                                    <div className="right-content">
-                                        {!showMainApp ? (
-                                            <ProjectDescription />
-                                        ) : (
-                                            <MapComponent
-                                                myLocation={myLocation}
-                                                searchedLocation={searchedLocation}
-                                                allLokasi={allLokasi}
-                                                allLaporan={allLaporan}
-                                                mapType={mapType}
-                                                setMapType={setMapType}
-                                                initialMapCenter={initialMapCenter}
-                                                initialMapZoom={initialMapZoom}
-                                            />
-                                        )}
-                                    </div>
-                                </div>
+                        <ReportModal
+                            showReportModal={showReportModal}
+                            setShowReportModal={setShowReportModal}
+                            reportData={reportData}
+                            setReportData={setReportData}
+                            geocodeLocation={geocodeLocation}
+                            initialMapCenter={initialMapCenter}
+                            setAllLaporan={setAllLaporan}
+                        />
+                    </>
+                } />
+              <Route 
+  path="/map" 
+  element={
+    <MapComponent
+      myLocation={myLocation}
+      searchedLocation={searchedLocation}
+      allLokasi={allLokasi}
+      allLaporan={allLaporan}
+      mapType={mapType}
+      setMapType={setMapType}
+      initialMapCenter={initialMapCenter}
+      initialMapZoom={initialMapZoom}
+    />
+  }
+/>
 
-                                <ReportModal
-                                    showReportModal={showReportModal}
-                                    setShowReportModal={setShowReportModal}
-                                    reportData={reportData}
-                                    setReportData={setReportData}
-                                    geocodeLocation={geocodeLocation}
-                                    initialMapCenter={initialMapCenter}
-                                    setAllLaporan={setAllLaporan}
-                                />
-                            </>
-                        } />
-                        <Route path="/map" element={
-                            <MapComponent
-                                myLocation={myLocation}
-                                searchedLocation={searchedLocation}
-                                allLokasi={allLokasi}
-                                allLaporan={allLaporan}
-                                mapType={mapType}
-                                setMapType={setMapType}
-                                initialMapCenter={initialMapCenter}
-                                initialMapZoom={initialMapZoom}
-                            />
-                        } />
-                        <Route path="/description" element={<ProjectDescription />} />
-                        <Route path="/logout" element={<div style={{ padding: '2rem' }}>✅ Kamu sudah logout.</div>} />
-                    </Routes>
-                </>
-            )}
+                <Route path="/description" element={<ProjectDescription />} />
+                <Route path="/logout" element={<div style={{ padding: '2rem' }}>✅ Kamu sudah logout.</div>} />
+            </Routes>
         </BrowserRouter>
     );
 }
