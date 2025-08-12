@@ -54,7 +54,7 @@ export default function ChatbotSidebar({
         "Apa saja hewan yang dapat dicek",
         "Daftar sayuran",
         "[Nama Hewan] cocok di mana?",
-          "[Nama Sayuran] cocok di mana?",
+        "[Nama Sayuran] cocok di mana?",
         "Dimana letak [nama_lokasi]",
         "Di mana posisi [nama_lokasi]",
         "Koordinat [nama lokasi]",
@@ -116,7 +116,8 @@ export default function ChatbotSidebar({
 
         setChatHistory(prev => [...prev, { type: 'user', text: userMessage }]);
         setChatInput('');
-        setShowQuickSearchSuggestions(false);
+        // NOTE: The line below was removed to keep suggestions visible
+        // setShowQuickSearchSuggestions(false); 
         setChatLoading(true);
 
         // Add a temporary bot message to the history for the typing animation
@@ -174,7 +175,8 @@ export default function ChatbotSidebar({
         const locationToSearch = searchLocationInput.trim();
         setChatHistory(prev => [...prev, { type: 'user', text: `Mencari lokasi: ${locationToSearch}` }]);
         setSearchLocationInput('');
-        setShowQuickSearchSuggestions(false);
+        // NOTE: The line below was removed to keep suggestions visible
+        // setShowQuickSearchSuggestions(false);
         setChatLoading(true);
 
         try {
@@ -226,7 +228,8 @@ export default function ChatbotSidebar({
 
     const handleQuickSearchClick = (suggestion) => {
         setChatInput(suggestion);
-        setShowQuickSearchSuggestions(false);
+        // NOTE: The line below was removed to keep suggestions visible
+        // setShowQuickSearchSuggestions(false);
     };
 
     return (
@@ -317,22 +320,22 @@ export default function ChatbotSidebar({
                 {chatLoading && <div className="chat-msg bot loading">⏳ AI sedang menjawab...</div>}
             </div>
 
-            {showQuickSearchSuggestions && chatInput.trim() === '' && (
-                <div className="quick-search-suggestions">
-                    {quickSearchSuggestions.map((suggestion, index) => (
-                        <motion.button
-                            key={index}
-                            onClick={() => handleQuickSearchClick(suggestion)}
-                            className="quick-search-button"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            disabled={chatLoading || isTyping || showWelcomeOverlay}
-                        >
-                            {suggestion}
-                        </motion.button>
-                    ))}
-                </div>
-            )}
+            {/* Always show quick search suggestions */}
+            <div className="quick-search-suggestions">
+                {quickSearchSuggestions.map((suggestion, index) => (
+                    <motion.button
+                        key={index}
+                        onClick={() => handleQuickSearchClick(suggestion)}
+                        className="quick-search-button"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        disabled={chatLoading || isTyping || showWelcomeOverlay}
+                    >
+                        {suggestion}
+                    </motion.button>
+                ))}
+            </div>
+
 
             <form onSubmit={handleChatSubmit} className="chat-input-area">
                 <input
@@ -341,11 +344,6 @@ export default function ChatbotSidebar({
                     value={chatInput}
                     onChange={(e) => {
                         setChatInput(e.target.value);
-                        if (e.target.value.trim() === '') {
-                            setShowQuickSearchSuggestions(true);
-                        } else {
-                            setShowQuickSearchSuggestions(false);
-                        }
                     }}
                     disabled={chatLoading || isTyping || showWelcomeOverlay}
                 />
