@@ -199,7 +199,7 @@ ${penilaianSayuran.length > 0
                 const penilaianHewan = res.data.penilaian.hewan;
                 const penilaianSayuran = res.data.penilaian.sayuran;
 
-                const responseText = `**📍 Lokasi "${nearestLocationData.nama || 'Tidak diketahui'}" ditemukan!**
+                const responseText = `**📍 Lokasi "${locationToSearch}" ditemukan!**
 - **Provinsi:** ${nearestLocationData.provinsi || 'Tidak diketahui'}
 - **Kota/Kabupaten:** ${nearestLocationData.kotakab || 'Tidak diketahui'}
 - **Kecamatan:** ${nearestLocationData.kecamatan || 'Tidak diketahui'}
