@@ -111,7 +111,6 @@ export default function ProjectDescription() {
         <p><strong>Chatbot AI</strong></p>
         <ul>
           <li>NLP + Fuzzy Matching</li>
-          <li>43 jenis pertanyaan yang dapat dijawab</li>
           <li>Template respons dinamis</li>
           <li>Tidak bergantung pada internet cepat, bisa pakai data lokal</li>
         </ul>
