@@ -21,6 +21,20 @@ const ChatMessage = ({ type, text, isTyping }) => {
     );
 };
 
+// Helper function to calculate distance between two lat/lon coordinates (Haversine formula)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = (value) => (value * Math.PI) / 180;
+    const R = 6371; // Radius of the Earth in km
+
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+};
+
 export default function ChatbotSidebar({
     showMainApp,
     showWelcomeOverlay,
@@ -188,15 +202,37 @@ ${penilaianSayuran.length > 0
         setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
 
         try {
-            // Panggil API baru untuk mendapatkan semua lokasi
-            const res = await axios.get(`https://bisakah.pythonanywhere.com/api/all`);
-            
-            const allLocations = res.data.lokasi || [];
+            // Get lat/lon for the user's search input
+            const geoResult = await geocodeLocation(locationToSearch);
             
             let responseText = '';
-            if (allLocations.length > 0) {
-                responseText = `**📍 Daftar Lokasi yang Tersedia:**\n\n`;
-                allLocations.forEach((loc, index) => {
+            if (geoResult) {
+                setSearchedLocation(geoResult);
+                setMyLocation(null);
+
+                // Fetch all locations from the API
+                const res = await axios.get(`https://bisakah.pythonanywhere.com/api/all`);
+                const allLocations = res.data.lokasi || [];
+                
+                let nearestLocation = null;
+                let minDistance = Infinity;
+
+                // Find the nearest location from the list
+                if (allLocations.length > 0) {
+                    allLocations.forEach(loc => {
+                        // Assuming each location has lat and lon properties
+                        if (loc.lat && loc.lon) {
+                            const distance = calculateDistance(geoResult.lat, geoResult.lon, loc.lat, loc.lon);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                nearestLocation = loc;
+                            }
+                        }
+                    });
+                }
+
+                // If a nearest location is found, format the response text
+                if (nearestLocation) {
                     const {
                         desa,
                         kecamatan,
@@ -210,10 +246,10 @@ ${penilaianSayuran.length > 0
                         rata2_hu,
                         pilihan_tepat,
                         cocok_untuk
-                    } = loc;
+                    } = nearestLocation;
 
-                    responseText += `---
-### ${index + 1}. **${desa || 'N/A'}, ${kecamatan || 'N/A'}, ${kotakab || 'N/A'}, ${provinsi || 'N/A'}**
+                    responseText = `**📍 Lokasi terdekat dari pencarian Anda "${locationToSearch}": ${desa || 'N/A'}, ${kecamatan || 'N/A'}, ${kotakab || 'N/A'}, ${provinsi || 'N/A'}**
+
 🌡 Suhu Saat Ini: ${suhu_realtime != null ? `${suhu_realtime}°C` : 'N/A'}
 💧 Kelembapan Saat Ini: ${kelembapan_realtime != null ? `${kelembapan_realtime}%` : 'N/A'}
 ☁️ Kondisi Cuaca: ${weather_desc || 'Tidak ada data'}
@@ -223,7 +259,7 @@ ${penilaianSayuran.length > 0
 - Maksimum: ${suhu_hari_ini?.max != null ? `${suhu_hari_ini.max}°C` : 'N/A'}
 - Minimum: ${suhu_hari_ini?.min != null ? `${suhu_hari_ini.min}°C` : 'N/A'}
 
-📊Periode Rata-rata (2 hari kedepan):
+📊 Periode Rata-rata (2 hari kedepan):
 🌡 Suhu rata-rata periode: ${rata2_suhu != null ? `${rata2_suhu}°C` : 'N/A'}
 💧 Kelembapan rata-rata periode: ${rata2_hu != null ? `${rata2_hu}%` : 'N/A'}
 
@@ -241,11 +277,13 @@ ${(cocok_untuk?.hewan || []).length > 0
 ${(cocok_untuk?.sayuran || []).length > 0
     ? cocok_untuk.sayuran.map(item => `- ${item.nama || 'N/A'} (Skor: ${item.skor ?? 'N/A'}, ${item.alasan_skor || ''})`).join('\n')
     : 'Tidak ada'}
----
 `;
-                });
+                } else {
+                    responseText = `❌ Tidak ada data lokasi yang tersedia.`;
+                }
+
             } else {
-                responseText = `❌ Tidak ada data lokasi yang tersedia.`;
+                responseText = `❌ Lokasi "${locationToSearch}" tidak ditemukan. Coba nama lokasi yang lebih spesifik.`;
             }
                 
             setBotResponseText(responseText);
@@ -416,4 +454,3 @@ ${(cocok_untuk?.sayuran || []).length > 0
         </motion.div>
     );
 }
-
