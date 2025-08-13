@@ -188,57 +188,74 @@ ${penilaianSayuran.length > 0
         setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
 
         try {
-            const geoResult = await geocodeLocation(locationToSearch);
-            if (geoResult) {
-                setSearchedLocation(geoResult);
-                setMyLocation(null);
+            // Panggil API baru untuk mendapatkan semua lokasi
+            const res = await axios.get(`https://bisakah.pythonanywhere.com/api/all`);
+            
+            const allLocations = res.data.lokasi || [];
+            
+            let responseText = '';
+            if (allLocations.length > 0) {
+                responseText = `**📍 Daftar Lokasi yang Tersedia:**\n\n`;
+                allLocations.forEach((loc, index) => {
+                    const {
+                        desa,
+                        kecamatan,
+                        kotakab,
+                        provinsi,
+                        suhu_realtime,
+                        kelembapan_realtime,
+                        weather_desc,
+                        suhu_hari_ini,
+                        rata2_suhu,
+                        rata2_hu,
+                        pilihan_tepat,
+                        cocok_untuk
+                    } = loc;
 
-                const res = await axios.get(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${geoResult.lat}&lon=${geoResult.lon}`);
-                
-                const nearestLocationData = res.data.lokasi_terdekat;
-                const penilaianHewan = res.data.penilaian.hewan;
-                const penilaianSayuran = res.data.penilaian.sayuran;
+                    responseText += `---
+### ${index + 1}. **${desa || 'N/A'}, ${kecamatan || 'N/A'}, ${kotakab || 'N/A'}, ${provinsi || 'N/A'}**
+🌡 Suhu Saat Ini: ${suhu_realtime != null ? `${suhu_realtime}°C` : 'N/A'}
+💧 Kelembapan Saat Ini: ${kelembapan_realtime != null ? `${kelembapan_realtime}%` : 'N/A'}
+☁️ Kondisi Cuaca: ${weather_desc || 'Tidak ada data'}
 
-                const responseText = `**📍 Lokasi "${locationToSearch}" ditemukan!**
-- **Provinsi:** ${nearestLocationData.provinsi || 'Tidak diketahui'}
-- **Kota/Kabupaten:** ${nearestLocationData.kotakab || 'Tidak diketahui'}
-- **Kecamatan:** ${nearestLocationData.kecamatan || 'Tidak diketahui'}
-- **Desa:** ${nearestLocationData.desa || 'Tidak diketahui'}
+📅 Suhu Hari Ini:
+- Rata-rata: ${suhu_hari_ini?.rata2 != null ? `${suhu_hari_ini.rata2}°C` : 'N/A'}
+- Maksimum: ${suhu_hari_ini?.max != null ? `${suhu_hari_ini.max}°C` : 'N/A'}
+- Minimum: ${suhu_hari_ini?.min != null ? `${suhu_hari_ini.min}°C` : 'N/A'}
 
+📊Periode Rata-rata (2 hari kedepan):
+🌡 Suhu rata-rata periode: ${rata2_suhu != null ? `${rata2_suhu}°C` : 'N/A'}
+💧 Kelembapan rata-rata periode: ${rata2_hu != null ? `${rata2_hu}%` : 'N/A'}
+
+🐄 Rekomendasi Hewan (Skor > 70):
+${pilihan_tepat?.hewan?.length > 0 ? pilihan_tepat.hewan.join(', ') : 'Tidak ada data'}
+🥬 Rekomendasi Sayuran (Skor > 70):
+${pilihan_tepat?.sayuran?.length > 0 ? pilihan_tepat.sayuran.join(', ') : 'Tidak ada data'}
+
+**Penilaian:**
+🐄 Hewan:
+${(cocok_untuk?.hewan || []).length > 0
+    ? cocok_untuk.hewan.map(item => `- ${item.nama || 'N/A'} (Skor: ${item.skor ?? 'N/A'}, ${item.alasan_skor || ''})`).join('\n')
+    : 'Tidak ada'}
+🥬 Sayuran:
+${(cocok_untuk?.sayuran || []).length > 0
+    ? cocok_untuk.sayuran.map(item => `- ${item.nama || 'N/A'} (Skor: ${item.skor ?? 'N/A'}, ${item.alasan_skor || ''})`).join('\n')
+    : 'Tidak ada'}
 ---
-
-**🌱 5 Rekomendasi Hewan Teratas:**
-${penilaianHewan.length > 0
-    ? penilaianHewan.slice(0, 5).map(item => `- **${item.nama || 'Tidak diketahui'}** (Skor: ${item.skor || 0}) - *${item.alasan_skor || 'Tidak ada alasan'}*`).join('\n')
-    : "Tidak ada rekomendasi hewan yang cocok."
-}
-
----
-
-**🌿 5 Rekomendasi Sayuran Teratas:**
-${penilaianSayuran.length > 0
-    ? penilaianSayuran.slice(0, 5).map(item => `- **${item.nama || 'Tidak diketahui'}** (Skor: ${item.skor || 0}) - *${item.alasan_skor || 'Tidak ada alasan'}*`).join('\n')
-    : "Tidak ada rekomendasi sayuran yang cocok."
-}
 `;
-                
-                setBotResponseText(responseText);
-
-            } else {
-                const responseText = `❌ Lokasi "${locationToSearch}" tidak ditemukan. Coba nama lokasi yang lebih spesifik.`;
-                setChatHistory(prev => {
-                    const newHistory = [...prev];
-                    newHistory.pop(); // Hapus pesan bot kosong
-                    newHistory.push({ type: 'bot', text: responseText });
-                    return newHistory;
                 });
+            } else {
+                responseText = `❌ Tidak ada data lokasi yang tersedia.`;
             }
+                
+            setBotResponseText(responseText);
+
         } catch (error) {
-            console.error('Error geocoding location or fetching nearest location:', error);
+            console.error('Error fetching all locations:', error);
             setChatHistory(prev => {
                 const newHistory = [...prev];
                 newHistory.pop(); // Hapus pesan bot kosong
-                newHistory.push({ type: 'bot', text: "Terjadi kesalahan saat mencari lokasi atau mengambil data. Mohon coba lagi." });
+                newHistory.push({ type: 'bot', text: "Terjadi kesalahan saat mengambil data lokasi. Mohon coba lagi." });
                 return newHistory;
             });
         } finally {
@@ -399,3 +416,4 @@ ${penilaianSayuran.length > 0
         </motion.div>
     );
 }
+
