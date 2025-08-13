@@ -168,15 +168,13 @@ export default function ChatbotSidebar({
         }
     };
 
-    const handleFindLocationDirectly = async (e) => {
+     const handleFindLocationDirectly = async (e) => {
         e.preventDefault();
         if (searchLocationInput.trim() === '' || isTyping) return;
 
         const locationToSearch = searchLocationInput.trim();
         setChatHistory(prev => [...prev, { type: 'user', text: `Mencari lokasi: ${locationToSearch}` }]);
         setSearchLocationInput('');
-        // NOTE: The line below was removed to keep suggestions visible
-        // setShowQuickSearchSuggestions(false);
         setChatLoading(true);
 
         try {
@@ -185,21 +183,41 @@ export default function ChatbotSidebar({
                 setSearchedLocation(geoResult);
                 setMyLocation(null);
 
-                const res = await axios.get(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${geoResult.lat}&lon=${geoResult.lon}`);
-                const nearestLocationData = res.data.lokasi_terdekat;
-                const rekomendasiHewan = res.data.rekomendasi.hewan.join(', ') || 'Tidak ada';
-                const rekomendasiSayuran = res.data.rekomendasi.sayuran.join(', ') || 'Tidak ada';
+                // Buat pesan bot sementara untuk animasi
+                setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
 
-                const responseText = `**📍 Lokasi "${nearestLocationData.nama}" ditemukan!**
+                const res = await axios.get(`https://bisakah.pythonanywhere.com/api/nearest-location?lat=${geoResult.lat}&lon=${geoResult.lon}`);
+                
+                const nearestLocationData = res.data.lokasi_terdekat;
+                // Mengambil data penilaian dari respons API
+                const penilaianHewan = res.data.penilaian.hewan;
+                const penilaianSayuran = res.data.penilaian.sayuran;
+
+                // Membentuk teks respons yang lebih detail
+                let responseText = `**📍 Lokasi "${nearestLocationData.nama}" ditemukan!**
 - **Provinsi:** ${nearestLocationData.provinsi}
 - **Kota/Kabupaten:** ${nearestLocationData.kotakab}
 - **Kecamatan:** ${nearestLocationData.kecamatan}
 - **Desa:** ${nearestLocationData.desa}
 
-**🌱 Rekomendasi Pertanian:**
-- **Hewan:** ${rekomendasiHewan}
-- **Sayuran:** ${rekomendasiSayuran}
+---
+
+**🌱 5 Rekomendasi Hewan Teratas:**
+${penilaianHewan.length > 0
+    ? penilaianHewan.slice(0, 5).map(item => `- **${item.nama}** (Skor: ${item.skor}) - *${item.alasan_skor}*`).join('\n')
+    : "Tidak ada rekomendasi hewan yang cocok."
+}
+
+---
+
+**🌿 5 Rekomendasi Sayuran Teratas:**
+${penilaianSayuran.length > 0
+    ? penilaianSayuran.slice(0, 5).map(item => `- **${item.nama}** (Skor: ${item.skor}) - *${item.alasan_skor}*`).join('\n')
+    : "Tidak ada rekomendasi sayuran yang cocok."
+}
 `;
+                
+                // Menggunakan setBotResponseText untuk memicu efek mengetik
                 setBotResponseText(responseText);
 
             } else {
@@ -208,7 +226,15 @@ export default function ChatbotSidebar({
             }
         } catch (error) {
             console.error('Error geocoding location or fetching nearest location:', error);
-            setChatHistory(prev => [...prev, { type: 'bot', text: "Terjadi kesalahan saat mencari lokasi atau mengambil data. Mohon coba lagi." }]);
+            // Hapus pesan bot kosong sementara jika ada
+            setChatHistory(prev => {
+                const newHistory = [...prev];
+                if (newHistory.length > 0 && newHistory[newHistory.length - 1].type === 'bot' && newHistory[newHistory.length - 1].text === '') {
+                    newHistory.pop();
+                }
+                newHistory.push({ type: 'bot', text: "Terjadi kesalahan saat mencari lokasi atau mengambil data. Mohon coba lagi." });
+                return newHistory;
+            });
         } finally {
             setChatLoading(false);
         }
