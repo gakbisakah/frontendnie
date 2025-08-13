@@ -58,6 +58,7 @@ export default function ChatbotSidebar({
     const [showQuickSearchSuggestions, setShowQuickSearchSuggestions] = useState(true);
     const [botResponseText, setBotResponseText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
+    const [showScrollToBottom, setShowScrollToBottom] = useState(false); // State baru untuk notifikasi scroll
     const navigate = useNavigate();
 
     const quickSearchSuggestions = [
@@ -79,19 +80,44 @@ export default function ChatbotSidebar({
         "Ringkasan cuaca di [nama lokasi]",
     ];
 
+    // Efek untuk mengelola scroll dan notifikasi
     useEffect(() => {
-        if (chatBodyRef.current) {
-            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+        const chatBody = chatBodyRef.current;
+        if (!chatBody) return;
+
+        const handleScroll = () => {
+            // Tampilkan tombol "Scroll to bottom" jika pengguna menggulir ke atas
+            const isScrolledUp = chatBody.scrollHeight - chatBody.scrollTop > chatBody.clientHeight + 100;
+            setShowScrollToBottom(isScrolledUp);
+        };
+
+        // Otomatis scroll ke bawah hanya jika tidak ada typing dan pengguna tidak sedang menggulir ke atas
+        if (!isTyping) {
+            const isAtBottom = chatBody.scrollHeight - chatBody.scrollTop <= chatBody.clientHeight + 10;
+            if (isAtBottom) {
+                chatBody.scrollTop = chatBody.scrollHeight;
+                setShowScrollToBottom(false);
+            }
         }
-    }, [chatHistory, botResponseText]);
+        
+        chatBody.addEventListener('scroll', handleScroll);
+
+        return () => {
+            chatBody.removeEventListener('scroll', handleScroll);
+        };
+    }, [chatHistory, botResponseText, isTyping]);
 
     // Handle typing animation
     useEffect(() => {
-        if (!botResponseText) return;
+        if (!botResponseText) {
+            setIsTyping(false);
+            return;
+        }
 
         let i = 0;
         let displayedText = '';
         setIsTyping(true);
+        setShowScrollToBottom(false); // Sembunyikan notifikasi saat bot mengetik
 
         const typingInterval = setInterval(() => {
             if (i < botResponseText.length) {
@@ -111,11 +137,24 @@ export default function ChatbotSidebar({
                 clearInterval(typingInterval);
                 setIsTyping(false);
                 setBotResponseText(''); // Reset typing text
+                // Setelah selesai, cek lagi apakah perlu menampilkan tombol scroll
+                const chatBody = chatBodyRef.current;
+                if (chatBody && chatBody.scrollHeight - chatBody.scrollTop > chatBody.clientHeight + 10) {
+                    setShowScrollToBottom(true);
+                }
             }
         }, 30); // Kecepatan mengetik
 
         return () => clearInterval(typingInterval);
     }, [botResponseText, setChatHistory]);
+    
+    // Fungsi untuk mengarahkan kembali ke bagian paling bawah chat
+    const handleScrollToBottom = () => {
+        if (chatBodyRef.current) {
+            chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
+            setShowScrollToBottom(false);
+        }
+    };
 
     const handleChatSubmit = async (e) => {
         e.preventDefault();
@@ -131,6 +170,7 @@ export default function ChatbotSidebar({
         setChatHistory(prev => [...prev, { type: 'user', text: userMessage }]);
         setChatInput('');
         setChatLoading(true);
+        setShowScrollToBottom(false);
 
         // Add a temporary bot message to the history for the typing animation
         setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
@@ -197,6 +237,7 @@ ${penilaianSayuran.length > 0
         setChatHistory(prev => [...prev, { type: 'user', text: `Mencari lokasi: ${locationToSearch}` }]);
         setSearchLocationInput('');
         setChatLoading(true);
+        setShowScrollToBottom(false);
 
         // Buat pesan bot sementara untuk animasi
         setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
@@ -403,6 +444,19 @@ ${(cocok_untuk?.sayuran || []).length > 0
                     />
                 ))}
                 {chatLoading && <div className="chat-msg bot loading">⏳ AI sedang menjawab...</div>}
+                {showScrollToBottom && (
+                    <motion.button 
+                        className="scroll-to-bottom-button"
+                        onClick={handleScrollToBottom}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        >
+                        👇 Pesan Terbaru
+                    </motion.button>
+                )}
             </div>
 
             <div className="quick-search-suggestions">
