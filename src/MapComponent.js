@@ -308,30 +308,55 @@ export default function MapComponent({
                                             🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.suhu ?? 'N/A'}°C<br/>
                                             💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.kelembapan ?? 'N/A'}%<br/>
                                             ☁️ Cuaca: {nearestData.lokasi_terdekat.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br/><br/>
-                                            🐄 <b>Penilaian Hewan (Skor ≥ 70):</b><br/>
-                                            {(nearestData.penilaian?.hewan || []).filter(h => h.skor >= 70).length > 0
+                                            
+                                            **Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)**<br/>
+                                            {
+                                                (nearestData.penilaian?.hewan || []).filter(h => h.skor >= 70).length > 0
                                                 ? (
                                                     nearestData.penilaian.hewan
                                                         .filter(h => h.skor >= 70)
-                                                        .map((h, idx, arr) => (
-                                                            <span key={`hewan-${idx}`}>
-                                                                {h.nama} (Skor: {h.skor}, Alasan: {h.alasan_skor}){idx < arr.length - 1 ? ', ' : ''}
+                                                        .map((h, idx) => (
+                                                            <span key={`rec-hewan-${idx}`}>
+                                                                {h.nama} (Skor: {h.skor}){idx < (nearestData.penilaian.hewan.filter(h => h.skor >= 70).length - 1) ? ', ' : ''}
                                                             </span>
                                                         ))
                                                 )
-                                                : 'Tidak ada yang sangat cocok'}<br/><br/>
-                                            🥬 <b>Penilaian Sayuran (Skor ≥ 70):</b><br/>
-                                            {(nearestData.penilaian?.sayuran || []).filter(s => s.skor >= 70).length > 0
+                                                : 'Tidak ada data'
+                                            }<br/><br/>
+                                            
+                                            **Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)**<br/>
+                                            {
+                                                (nearestData.penilaian?.sayuran || []).filter(s => s.skor >= 70).length > 0
                                                 ? (
                                                     nearestData.penilaian.sayuran
                                                         .filter(s => s.skor >= 70)
-                                                        .map((s, idx, arr) => (
-                                                            <span key={`sayur-${idx}`}>
-                                                                {s.nama} (Skor: {s.skor}, Alasan: {s.alasan_skor}){idx < arr.length - 1 ? ', ' : ''}
+                                                        .map((s, idx) => (
+                                                            <span key={`rec-sayur-${idx}`}>
+                                                                {s.nama} (Skor: {s.skor}){idx < (nearestData.penilaian.sayuran.filter(s => s.skor >= 70).length - 1) ? ', ' : ''}
                                                             </span>
                                                         ))
                                                 )
-                                                : 'Tidak ada yang sangat cocok'}
+                                                : 'Tidak ada data'
+                                            }<br/><br/>
+
+                                            **Penilaian Lengkap**<br/>
+                                            🐄 Hewan:<br/>
+                                            {(nearestData.penilaian?.hewan || []).length > 0
+                                                ? (nearestData.penilaian.hewan.map((item, idx) => (
+                                                    <span key={`hewan-${idx}`}>
+                                                        - {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}, Alasan: {item.alasan_skor || 'N/A'})<br/>
+                                                    </span>
+                                                )))
+                                                : 'Tidak ada'}<br/>
+                                            
+                                            🥬 Sayuran:<br/>
+                                            {(nearestData.penilaian?.sayuran || []).length > 0
+                                                ? (nearestData.penilaian.sayuran.map((item, idx) => (
+                                                    <span key={`sayuran-${idx}`}>
+                                                        - {item.nama || 'N/A'} (Skor: {item.skor ?? 'N/A'}, Alasan: {item.alasan_skor || 'N/A'})<br/>
+                                                    </span>
+                                                )))
+                                                : 'Tidak ada'}
                                         </>
                                     ) : nearestData?.error ? (
                                         <p>❌ Error: {nearestData.error}</p>
