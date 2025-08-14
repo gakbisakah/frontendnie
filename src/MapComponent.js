@@ -1,23 +1,46 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { motion } from 'framer-motion';
-import { MapController } from './MapController';
+
+// Componente baru untuk mengontrol peta
+function MapController({ myLocation, searchedLocation }) {
+    const map = useMap();
+
+    useEffect(() => {
+        // Pindahkan peta ke lokasi pencarian
+        if (searchedLocation) {
+            map.flyTo([searchedLocation.lat, searchedLocation.lon], 16, {
+                animate: true,
+                duration: 1.5,
+            });
+        }
+        // Jika tidak ada lokasi pencarian, periksa lokasi pengguna
+        else if (myLocation) {
+            map.flyTo([myLocation.lat, myLocation.lon], 16, {
+                animate: true,
+                duration: 1.5,
+            });
+        }
+    }, [myLocation, searchedLocation, map]);
+
+    return null;
+}
 
 export default function MapComponent({
-    searchedLocation,
     allLokasi,
     allLaporan,
     mapType,
     setMapType,
     initialMapCenter,
     initialMapZoom,
+    searchedLocation,
     API
 }) {
-    const [myLocation, setMyLocation] = useState(null); // Pindahkan state myLocation ke sini
+    const [myLocation, setMyLocation] = useState(null);
     const [nearestData, setNearestData] = useState(null);
     const [searchedNearestData, setSearchedNearestData] = useState(null);
-    const [locationError, setLocationError] = useState(null); // Tambah state untuk error lokasi
+    const [locationError, setLocationError] = useState(null);
 
     // --- Custom icons ---
     const blueIcon = new L.Icon({
@@ -43,7 +66,7 @@ export default function MapComponent({
         return blueIcon;
     };
 
-    // --- FUNGSI BARU UNTUK MENDAPATKAN LOKASI PENGGUNA DENGAN LEBIH AKURAT ---
+    // --- FUNGSI MENDAPATKAN LOKASI PENGGUNA DENGAN LEBIH AKURAT ---
     useEffect(() => {
         if ("geolocation" in navigator) {
             const options = {
@@ -56,7 +79,7 @@ export default function MapComponent({
                 const { latitude, longitude, accuracy } = position.coords;
                 console.log(`✅ Lokasi ditemukan dengan akurasi: ${accuracy} meter.`);
                 setMyLocation({ lat: latitude, lon: longitude, accuracy: accuracy });
-                setLocationError(null); // Hapus error jika berhasil
+                setLocationError(null);
             };
 
             const error = (err) => {
@@ -65,10 +88,8 @@ export default function MapComponent({
                 setMyLocation(null);
             };
 
-            // Menggunakan watchPosition untuk memantau lokasi secara berkelanjutan
             const watchId = navigator.geolocation.watchPosition(success, error, options);
 
-            // Cleanup function: hentikan pemantauan saat komponen di-unmount
             return () => navigator.geolocation.clearWatch(watchId);
         } else {
             setLocationError("Geolocation tidak didukung oleh browser ini.");
