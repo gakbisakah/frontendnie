@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { MapController } from './MapController';
 
 export default function MapComponent({
-    myLocation,
     searchedLocation,
     allLokasi,
     allLaporan,
@@ -15,6 +14,11 @@ export default function MapComponent({
     initialMapZoom,
     API
 }) {
+    const [myLocation, setMyLocation] = useState(null); // Pindahkan state myLocation ke sini
+    const [nearestData, setNearestData] = useState(null);
+    const [searchedNearestData, setSearchedNearestData] = useState(null);
+    const [locationError, setLocationError] = useState(null); // Tambah state untuk error lokasi
+
     // --- Custom icons ---
     const blueIcon = new L.Icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
@@ -39,84 +43,105 @@ export default function MapComponent({
         return blueIcon;
     };
 
-    const [nearestData, setNearestData] = useState(null);
-    const [searchedNearestData, setSearchedNearestData] = useState(null);
+    // --- FUNGSI BARU UNTUK MENDAPATKAN LOKASI PENGGUNA DENGAN LEBIH AKURAT ---
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            };
+
+            const success = (position) => {
+                const { latitude, longitude, accuracy } = position.coords;
+                console.log(`✅ Lokasi ditemukan dengan akurasi: ${accuracy} meter.`);
+                setMyLocation({ lat: latitude, lon: longitude, accuracy: accuracy });
+                setLocationError(null); // Hapus error jika berhasil
+            };
+
+            const error = (err) => {
+                console.error(`❌ Gagal mendapatkan lokasi pengguna: ${err.message}`);
+                setLocationError(`Gagal mendapatkan lokasi. Kode: ${err.code}. Pesan: ${err.message}`);
+                setMyLocation(null);
+            };
+
+            // Menggunakan watchPosition untuk memantau lokasi secara berkelanjutan
+            const watchId = navigator.geolocation.watchPosition(success, error, options);
+
+            // Cleanup function: hentikan pemantauan saat komponen di-unmount
+            return () => navigator.geolocation.clearWatch(watchId);
+        } else {
+            setLocationError("Geolocation tidak didukung oleh browser ini.");
+            console.error("❌ Geolocation tidak didukung oleh browser ini.");
+        }
+    }, []);
 
     // Fetch nearest location saat myLocation berubah
-   useEffect(() => {
-     if (myLocation) {
-         const fetchNearest = async () => {
-             try {
-                // Perbaikan: Pastikan URL API sudah benar.
-                // Jika API tidak diberikan, gunakan URL default.
-                const apiUrl = API || 'https://bisakah.pythonanywhere.com';
-                const url = `${apiUrl}/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`;
+    useEffect(() => {
+        if (myLocation) {
+            const fetchNearest = async () => {
+                try {
+                    const apiUrl = API || 'https://bisakah.pythonanywhere.com';
+                    const url = `${apiUrl}/api/nearest-location?lat=${myLocation.lat}&lon=${myLocation.lon}`;
 
-                 const res = await fetch(url);
-                 
-                 // Cek jika respons tidak berhasil
-                 if (!res.ok) {
-                     const errorText = await res.text();
-                     throw new Error(`Server merespons dengan status ${res.status}: ${errorText}`);
-                 }
-                 
-                 // Periksa apakah respons adalah JSON yang valid
-                 const contentType = res.headers.get("content-type");
-                 if (contentType && contentType.indexOf("application/json") !== -1) {
-                     const data = await res.json();
-                     setNearestData(data);
-                 } else {
-                     const errorText = await res.text();
-                     throw new Error(`Server merespons dengan tipe konten yang tidak terduga: ${contentType}. Respons: ${errorText}`);
-                 }
-             } catch (error) {
-                 console.error('❌ Error fetching nearest location for myLocation:', error);
-                 setNearestData({ error: 'Gagal memuat data lokasi terdekat. Pastikan server berfungsi dengan baik.', details: error.message });
-             }
-         };
-         fetchNearest();
-     } else {
-         setNearestData(null);
-     }
- }, [myLocation, API]);
+                    const res = await fetch(url);
+
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`Server merespons dengan status ${res.status}: ${errorText}`);
+                    }
+
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await res.json();
+                        setNearestData(data);
+                    } else {
+                        const errorText = await res.text();
+                        throw new Error(`Server merespons dengan tipe konten yang tidak terduga: ${contentType}. Respons: ${errorText}`);
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching nearest location for myLocation:', error);
+                    setNearestData({ error: 'Gagal memuat data lokasi terdekat. Pastikan server berfungsi dengan baik.', details: error.message });
+                }
+            };
+            fetchNearest();
+        } else {
+            setNearestData(null);
+        }
+    }, [myLocation, API]);
 
     // Fetch nearest location saat searchedLocation berubah
- // Fetch nearest location saat searchedLocation berubah
- useEffect(() => {
-     if (searchedLocation) {
-         const fetchSearchedNearest = async () => {
-             try {
-                // Perbaikan: Pastikan URL API sudah benar.
-                // Jika API tidak diberikan, gunakan URL default.
-                const apiUrl = API || 'https://bisakah.pythonanywhere.com';
-                const url = `${apiUrl}/api/nearest-location?lat=${searchedLocation.lat}&lon=${searchedLocation.lon}`;
-                 const res = await fetch(url);
+    useEffect(() => {
+        if (searchedLocation) {
+            const fetchSearchedNearest = async () => {
+                try {
+                    const apiUrl = API || 'https://bisakah.pythonanywhere.com';
+                    const url = `${apiUrl}/api/nearest-location?lat=${searchedLocation.lat}&lon=${searchedLocation.lon}`;
+                    const res = await fetch(url);
 
-                 // Cek jika respons tidak berhasil
-                 if (!res.ok) {
-                     const errorText = await res.text();
-                     throw new Error(`Server merespons dengan status ${res.status}: ${errorText}`);
-                 }
+                    if (!res.ok) {
+                        const errorText = await res.text();
+                        throw new Error(`Server merespons dengan status ${res.status}: ${errorText}`);
+                    }
 
-                 // Periksa apakah respons adalah JSON yang valid
-                 const contentType = res.headers.get("content-type");
-                 if (contentType && contentType.indexOf("application/json") !== -1) {
-                     const data = await res.json();
-                     setSearchedNearestData(data);
-                 } else {
-                     const errorText = await res.text();
-                     throw new Error(`Server merespons dengan tipe konten yang tidak terduga: ${contentType}. Respons: ${errorText}`);
-                 }
-             } catch (error) {
-                 console.error('❌ Error fetching nearest location for searchedLocation:', error);
-                 setSearchedNearestData({ error: 'Gagal memuat data lokasi terdekat. Pastikan server berfungsi dengan baik.', details: error.message });
-             }
-         };
-         fetchSearchedNearest();
-     } else {
-         setSearchedNearestData(null);
-     }
- }, [searchedLocation, API]);
+                    const contentType = res.headers.get("content-type");
+                    if (contentType && contentType.indexOf("application/json") !== -1) {
+                        const data = await res.json();
+                        setSearchedNearestData(data);
+                    } else {
+                        const errorText = await res.text();
+                        throw new Error(`Server merespons dengan tipe konten yang tidak terduga: ${contentType}. Respons: ${errorText}`);
+                    }
+                } catch (error) {
+                    console.error('❌ Error fetching nearest location for searchedLocation:', error);
+                    setSearchedNearestData({ error: 'Gagal memuat data lokasi terdekat. Pastikan server berfungsi dengan baik.', details: error.message });
+                }
+            };
+            fetchSearchedNearest();
+        } else {
+            setSearchedNearestData(null);
+        }
+    }, [searchedLocation, API]);
 
     return (
         <div className="map-container">
@@ -145,25 +170,25 @@ export default function MapComponent({
                                         Lokasi terdekat: {searchedNearestData.lokasi_terdekat?.desa || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kecamatan || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kotkab || 'N/A'}, {searchedNearestData.lokasi_terdekat?.provinsi || 'N/A'}
                                         <br /><br />
                                         <b>Data Cuaca</b><br />
-                                        🌡 Suhu Saat Ini: {searchedNearestData.lokasi_terdekat?.suhu_realtime != null 
-    ? `${searchedNearestData.lokasi_terdekat.suhu_realtime}°C` 
-    : 'N/A'}<br />
-💧 Kelembapan Saat Ini: {searchedNearestData.lokasi_terdekat?.kelembapan_realtime != null 
-    ? `${searchedNearestData.lokasi_terdekat.kelembapan_realtime}%` 
-    : 'N/A'}<br />
-☁️ Kondisi Cuaca: {searchedNearestData.lokasi_terdekat?.weather_desc || 'Tidak ada data'}<br /><br />
+                                        🌡 Suhu Saat Ini: {searchedNearestData.lokasi_terdekat?.suhu_realtime != null
+                                            ? `${searchedNearestData.lokasi_terdekat.suhu_realtime}°C`
+                                            : 'N/A'}<br />
+                                        💧 Kelembapan Saat Ini: {searchedNearestData.lokasi_terdekat?.kelembapan_realtime != null
+                                            ? `${searchedNearestData.lokasi_terdekat.kelembapan_realtime}%`
+                                            : 'N/A'}<br />
+                                        ☁️ Kondisi Cuaca: {searchedNearestData.lokasi_terdekat?.weather_desc || 'Tidak ada data'}<br /><br />
 
-                                        
+
                                         <b>Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)</b><br />
                                         {searchedNearestData.rekomendasi?.hewan?.length > 0
                                             ? <>{searchedNearestData.rekomendasi.hewan.join(', ')}<br /></>
                                             : 'Tidak ada data'}<br />
-                                        
+
                                         <b>Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)</b><br />
                                         {searchedNearestData.rekomendasi?.sayuran?.length > 0
                                             ? <>{searchedNearestData.rekomendasi.sayuran.join(', ')}<br /></>
                                             : 'Tidak ada data'}<br /><br />
-                                        
+
                                         <b>Penilaian Lengkap</b><br />
                                         🐄 Hewan:<br />
                                         {(searchedNearestData.penilaian?.hewan || []).length > 0
@@ -173,7 +198,7 @@ export default function MapComponent({
                                                 </span>
                                             )))
                                             : 'Tidak ada'}<br />
-                                        
+
                                         🥬 Sayuran:<br />
                                         {(searchedNearestData.penilaian?.sayuran || []).length > 0
                                             ? (searchedNearestData.penilaian.sayuran.map((item, idx) => (
@@ -306,43 +331,44 @@ export default function MapComponent({
                                 <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
                                     📍 Ini lokasi kamu sekarang<br/>
                                     <b>Latitude:</b> {myLocation.lat}<br/>
-                                    <b>Longitude:</b> {myLocation.lon}<br/><br/>
+                                    <b>Longitude:</b> {myLocation.lon}<br/>
+                                    <b>Akurasi:</b> {myLocation.accuracy ? `${Math.round(myLocation.accuracy)} meter` : 'N/A'}<br/><br/>
                                     {nearestData?.lokasi_terdekat ? (
                                         <>
                                             🌏 <b>Lokasi Terdekat:</b> {nearestData.lokasi_terdekat.desa}, {nearestData.lokasi_terdekat.kecamatan}, {nearestData.lokasi_terdekat.kotkab}, {nearestData.lokasi_terdekat.provinsi}<br/><br/>
-                                       🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat?.suhu_realtime ?? 'N/A'}°C<br/>
-💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat?.kelembapan_realtime ?? 'N/A'}%<br/>
-☁️ Cuaca: {nearestData.lokasi_terdekat?.weather_desc || 'Tidak ada data'}<br/><br/>
+                                            🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat?.suhu_realtime ?? 'N/A'}°C<br/>
+                                            💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat?.kelembapan_realtime ?? 'N/A'}%<br/>
+                                            ☁️ Cuaca: {nearestData.lokasi_terdekat?.weather_desc || 'Tidak ada data'}<br/><br/>
 
-                                            
+
                                             **Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)**<br/>
                                             {
                                                 (nearestData.penilaian?.hewan || []).filter(h => h.skor >= 70).length > 0
-                                                ? (
-                                                    nearestData.penilaian.hewan
-                                                        .filter(h => h.skor >= 70)
-                                                        .map((h, idx) => (
-                                                            <span key={`rec-hewan-${idx}`}>
-                                                                {h.nama} (Skor: {h.skor}){idx < (nearestData.penilaian.hewan.filter(h => h.skor >= 70).length - 1) ? ', ' : ''}
-                                                            </span>
-                                                        ))
-                                                )
-                                                : 'Tidak ada data'
+                                                    ? (
+                                                        nearestData.penilaian.hewan
+                                                            .filter(h => h.skor >= 70)
+                                                            .map((h, idx) => (
+                                                                <span key={`rec-hewan-${idx}`}>
+                                                                    {h.nama} (Skor: {h.skor}){idx < (nearestData.penilaian.hewan.filter(h => h.skor >= 70).length - 1) ? ', ' : ''}
+                                                                </span>
+                                                            ))
+                                                    )
+                                                    : 'Tidak ada data'
                                             }<br/><br/>
-                                            
+
                                             **Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)**<br/>
                                             {
                                                 (nearestData.penilaian?.sayuran || []).filter(s => s.skor >= 70).length > 0
-                                                ? (
-                                                    nearestData.penilaian.sayuran
-                                                        .filter(s => s.skor >= 70)
-                                                        .map((s, idx) => (
-                                                            <span key={`rec-sayur-${idx}`}>
-                                                                {s.nama} (Skor: {s.skor}){idx < (nearestData.penilaian.sayuran.filter(s => s.skor >= 70).length - 1) ? ', ' : ''}
-                                                            </span>
-                                                        ))
-                                                )
-                                                : 'Tidak ada data'
+                                                    ? (
+                                                        nearestData.penilaian.sayuran
+                                                            .filter(s => s.skor >= 70)
+                                                            .map((s, idx) => (
+                                                                <span key={`rec-sayur-${idx}`}>
+                                                                    {s.nama} (Skor: {s.skor}){idx < (nearestData.penilaian.sayuran.filter(s => s.skor >= 70).length - 1) ? ', ' : ''}
+                                                                </span>
+                                                            ))
+                                                    )
+                                                    : 'Tidak ada data'
                                             }<br/><br/>
 
                                             **Penilaian Lengkap**<br/>
@@ -354,7 +380,7 @@ export default function MapComponent({
                                                     </span>
                                                 )))
                                                 : 'Tidak ada'}<br/>
-                                            
+
                                             🥬 Sayuran:<br/>
                                             {(nearestData.penilaian?.sayuran || []).length > 0
                                                 ? (nearestData.penilaian.sayuran.map((item, idx) => (
@@ -366,6 +392,8 @@ export default function MapComponent({
                                         </>
                                     ) : nearestData?.error ? (
                                         <p>❌ Error: {nearestData.error}</p>
+                                    ) : locationError ? (
+                                        <p>❌ Error: {locationError}</p>
                                     ) : (
                                         <p>Sedang memuat data lokasi terdekat...</p>
                                     )}
