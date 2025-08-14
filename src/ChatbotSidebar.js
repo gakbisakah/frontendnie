@@ -58,7 +58,7 @@ export default function ChatbotSidebar({
     const [showQuickSearchSuggestions, setShowQuickSearchSuggestions] = useState(true);
     const [botResponseText, setBotResponseText] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [showScrollToBottom, setShowScrollToBottom] = useState(false);
+    const [showScrollToBottom, setShowScrollToBottom] = useState(false); // State baru untuk notifikasi scroll
     const navigate = useNavigate();
 
     const quickSearchSuggestions = [
@@ -86,10 +86,12 @@ export default function ChatbotSidebar({
         if (!chatBody) return;
 
         const handleScroll = () => {
+            // Tampilkan tombol "Scroll to bottom" jika pengguna menggulir ke atas
             const isScrolledUp = chatBody.scrollHeight - chatBody.scrollTop > chatBody.clientHeight + 100;
             setShowScrollToBottom(isScrolledUp);
         };
 
+        // Otomatis scroll ke bawah hanya jika tidak ada typing dan pengguna tidak sedang menggulir ke atas
         if (!isTyping) {
             const isAtBottom = chatBody.scrollHeight - chatBody.scrollTop <= chatBody.clientHeight + 10;
             if (isAtBottom) {
@@ -115,13 +117,14 @@ export default function ChatbotSidebar({
         let i = 0;
         let displayedText = '';
         setIsTyping(true);
-        setShowScrollToBottom(false);
+        setShowScrollToBottom(false); // Sembunyikan notifikasi saat bot mengetik
 
         const typingInterval = setInterval(() => {
             if (i < botResponseText.length) {
                 displayedText += botResponseText.charAt(i);
                 setChatHistory(prev => {
                     const newHistory = [...prev];
+                    // Find the last message and update it
                     if (newHistory.length > 0 && newHistory[newHistory.length - 1].type === 'bot') {
                         newHistory[newHistory.length - 1].text = displayedText;
                     } else {
@@ -133,13 +136,14 @@ export default function ChatbotSidebar({
             } else {
                 clearInterval(typingInterval);
                 setIsTyping(false);
-                setBotResponseText('');
+                setBotResponseText(''); // Reset typing text
+                // Setelah selesai, cek lagi apakah perlu menampilkan tombol scroll
                 const chatBody = chatBodyRef.current;
                 if (chatBody && chatBody.scrollHeight - chatBody.scrollTop > chatBody.clientHeight + 10) {
                     setShowScrollToBottom(true);
                 }
             }
-        }, 30);
+        }, 30); // Kecepatan mengetik
 
         return () => clearInterval(typingInterval);
     }, [botResponseText, setChatHistory]);
@@ -167,6 +171,8 @@ export default function ChatbotSidebar({
         setChatInput('');
         setChatLoading(true);
         setShowScrollToBottom(false);
+
+        // Add a temporary bot message to the history for the typing animation
         setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
 
         try {
@@ -181,7 +187,7 @@ export default function ChatbotSidebar({
 
                     responseText = `**📍 Lokasi Terdekat dari posisi Anda: ${nearestLocationData.nama || 'Tidak diketahui'}**
 - **Provinsi:** ${nearestLocationData.provinsi || 'Tidak diketahui'}
-- **Kota/Kabupaten:** ${nearestLocationData.kotkab || 'Tidak diketahui'}
+- **Kota/Kabupaten:** ${nearestLocationData.kotakab || 'Tidak diketahui'}
 - **Kecamatan:** ${nearestLocationData.kecamatan || 'Tidak diketahui'}
 - **Desa:** ${nearestLocationData.desa || 'Tidak diketahui'}
 
@@ -214,7 +220,7 @@ ${penilaianSayuran.length > 0
             console.error('Error fetching chatbot response or nearest location:', error);
             setChatHistory(prev => {
                 const newHistory = [...prev];
-                newHistory.pop();
+                newHistory.pop(); // Hapus pesan bot kosong
                 newHistory.push({ type: 'bot', text: "Maaf, terjadi kesalahan saat berkomunikasi. Mohon coba lagi nanti." });
                 return newHistory;
             });
@@ -232,9 +238,12 @@ ${penilaianSayuran.length > 0
         setSearchLocationInput('');
         setChatLoading(true);
         setShowScrollToBottom(false);
+
+        // Buat pesan bot sementara untuk animasi
         setChatHistory(prev => [...prev, { type: 'bot', text: '' }]);
 
         try {
+            // Get lat/lon for the user's search input
             const geoResult = await geocodeLocation(locationToSearch);
             
             let responseText = '';
@@ -242,14 +251,17 @@ ${penilaianSayuran.length > 0
                 setSearchedLocation(geoResult);
                 setMyLocation(null);
 
+                // Fetch all locations from the API
                 const res = await axios.get(`https://bisakah.pythonanywhere.com/api/all`);
                 const allLocations = res.data.lokasi || [];
                 
                 let nearestLocation = null;
                 let minDistance = Infinity;
 
+                // Find the nearest location from the list
                 if (allLocations.length > 0) {
                     allLocations.forEach(loc => {
+                        // Assuming each location has lat and lon properties
                         if (loc.lat && loc.lon) {
                             const distance = calculateDistance(geoResult.lat, geoResult.lon, loc.lat, loc.lon);
                             if (distance < minDistance) {
@@ -260,11 +272,12 @@ ${penilaianSayuran.length > 0
                     });
                 }
 
+                // If a nearest location is found, format the response text
                 if (nearestLocation) {
                     const {
                         desa,
                         kecamatan,
-                        kotkab,
+                        kotakab,
                         provinsi,
                         suhu_realtime,
                         kelembapan_realtime,
@@ -276,7 +289,7 @@ ${penilaianSayuran.length > 0
                         cocok_untuk
                     } = nearestLocation;
 
-                    responseText = `**📍 Lokasi terdekat dari pencarian Anda "${locationToSearch}": ${desa || 'N/A'}, ${kecamatan || 'N/A'}, ${kotkab || 'N/A'}, ${provinsi || 'N/A'}**
+                    responseText = `**📍 Lokasi terdekat dari pencarian Anda "${locationToSearch}": ${desa || 'N/A'}, ${kecamatan || 'N/A'}, ${kotakab || 'N/A'}, ${provinsi || 'N/A'}**
 
 🌡 Suhu Saat Ini: ${suhu_realtime != null ? `${suhu_realtime}°C` : 'N/A'}
 💧 Kelembapan Saat Ini: ${kelembapan_realtime != null ? `${kelembapan_realtime}%` : 'N/A'}
@@ -320,7 +333,7 @@ ${(cocok_untuk?.sayuran || []).length > 0
             console.error('Error fetching all locations:', error);
             setChatHistory(prev => {
                 const newHistory = [...prev];
-                newHistory.pop();
+                newHistory.pop(); // Hapus pesan bot kosong
                 newHistory.push({ type: 'bot', text: "Terjadi kesalahan saat mengambil data lokasi. Mohon coba lagi." });
                 return newHistory;
             });
@@ -358,10 +371,7 @@ ${(cocok_untuk?.sayuran || []).length > 0
                 {showMainApp && (
                     <div className="header-buttons">
                         <motion.button
-                            onClick={() => {
-                                handleFindMe(true);
-                                setSearchedLocation(null);
-                            }}
+                            onClick={() => handleFindMe()}
                             className="find-me-button"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
