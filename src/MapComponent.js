@@ -203,12 +203,12 @@ export default function MapComponent({
                                         <b>Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)</b><br />
                                         {searchedNearestData.rekomendasi?.hewan?.length > 0
                                             ? <>{searchedNearestData.rekomendasi.hewan.join(', ')}<br /></>
-                                            : 'Tidak ada data'}<br />
+                                            : 'Tidak ada rekomendasi'}<br />
 
                                         <b>Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)</b><br />
                                         {searchedNearestData.rekomendasi?.sayuran?.length > 0
                                             ? <>{searchedNearestData.rekomendasi.sayuran.join(', ')}<br /></>
-                                            : 'Tidak ada data'}<br /><br />
+                                            : 'Tidak ada rekomendasi'}<br /><br />
 
                                         <b>Penilaian Lengkap</b><br />
                                         🐄 Hewan:<br />
@@ -254,9 +254,9 @@ export default function MapComponent({
                                 🌡 Suhu rata-rata periode: {r.rata2_suhu != null ? `${r.rata2_suhu}°C` : 'N/A'}<br />
                                 💧 Kelembapan rata-rata periode: {r.rata2_hu != null ? `${r.rata2_hu}%` : 'N/A'}<br /><br />
                                 🐄 Rekomendasi Hewan<br />✅ Sangat Cocok (Skor diatas 70 ) <br />
-                                {r.pilihan_tepat?.hewan?.length > 0 ? <>{r.pilihan_tepat.hewan.join(', ')}<br /></> : '🐄 Hewan: Tidak ada data'}<br />
+                                {r.pilihan_tepat?.hewan?.length > 0 ? <>{r.pilihan_tepat.hewan.join(', ')}<br /></> : '🐄 Hewan: Tidak ada rekomendasi'}<br />
                                 🥬 Rekomendasi Sayuran<br />✅ Sangat Cocok (Skor diatas 70 ) <br />
-                                {r.pilihan_tepat?.sayuran?.length > 0 ? <>{r.pilihan_tepat.sayuran.join(', ')}<br /></> : '🥬 Sayuran: Tidak ada data'}<br /><br />
+                                {r.pilihan_tepat?.sayuran?.length > 0 ? <>{r.pilihan_tepat.sayuran.join(', ')}<br /></> : '🥬 Sayuran: Tidak ada rekomendasi'}<br /><br />
                                 <b>Penilaian:</b><br />
                                 🐄 Hewan:<br />
                                 {(r.cocok_untuk?.hewan || []).length > 0
@@ -374,7 +374,7 @@ export default function MapComponent({
                                                                 </span>
                                                             ))
                                                     )
-                                                    : 'Tidak ada data'
+                                                    : 'Tidak ada rekomendasi'
                                             }<br/><br/>
 
                                             **Rekomendasi Sayuran (Sangat Cocok, Skor ≥ 70)**<br/>
@@ -389,7 +389,7 @@ export default function MapComponent({
                                                                 </span>
                                                             ))
                                                     )
-                                                    : 'Tidak ada data'
+                                                    : 'Tidak ada rekomendasi'
                                             }<br/><br/>
 
                                             **Penilaian Lengkap**<br/>

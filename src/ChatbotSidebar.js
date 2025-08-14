@@ -309,8 +309,13 @@ ${pilihan_tepat?.hewan?.length > 0 ? pilihan_tepat.hewan.join(', ') : 'Tidak ada
 🥬 Rekomendasi Sayuran (Skor > 70):
 ${pilihan_tepat?.sayuran?.length > 0 ? pilihan_tepat.sayuran.join(', ') : 'Tidak ada data'}
 
+**Penilaian:**
+🐄 Rekomendasi Hewan (Skor > 70):
+${pilihan_tepat?.hewan?.length > 0 ? pilihan_tepat.hewan.join(', ') : 'Tidak ada rekomendasi'}
 
-Penilaian lengkap untuk hewan dan sayuran terdapat di Peta.
+🥬 Rekomendasi Sayuran (Skor > 70):
+${pilihan_tepat?.sayuran?.length > 0 ? pilihan_tepat.sayuran.join(', ') : 'Tidak ada rekomendasi'}
+
 `;
                 } else {
                     responseText = `❌ Tidak ada data lokasi yang tersedia.`;
