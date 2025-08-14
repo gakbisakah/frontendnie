@@ -4,7 +4,7 @@ import L from 'leaflet';
 import { motion } from 'framer-motion';
 
 // Componente baru untuk mengontrol peta
-function MapController({ myLocation, searchedLocation }) {
+function MapController({ myLocation, searchedLocation, mapCenterChanged }) {
     const map = useMap();
 
     useEffect(() => {
@@ -15,14 +15,14 @@ function MapController({ myLocation, searchedLocation }) {
                 duration: 1.5,
             });
         }
-        // Jika tidak ada lokasi pencarian, periksa lokasi pengguna
-        else if (myLocation) {
+        // Jika tidak ada lokasi pencarian, periksa lokasi pengguna (hanya jika baru ditemukan)
+        else if (myLocation && mapCenterChanged) {
             map.flyTo([myLocation.lat, myLocation.lon], 16, {
                 animate: true,
                 duration: 1.5,
             });
         }
-    }, [myLocation, searchedLocation, map]);
+    }, [myLocation, searchedLocation, map, mapCenterChanged]);
 
     return null;
 }
@@ -35,12 +35,15 @@ export default function MapComponent({
     initialMapCenter,
     initialMapZoom,
     searchedLocation,
-    API
+    API,
+    clearMyLocation, // Tambahkan prop baru untuk menghapus lokasi
 }) {
     const [myLocation, setMyLocation] = useState(null);
     const [nearestData, setNearestData] = useState(null);
     const [searchedNearestData, setSearchedNearestData] = useState(null);
     const [locationError, setLocationError] = useState(null);
+    const [isFindingLocation, setIsFindingLocation] = useState(false);
+    const [mapCenterChanged, setMapCenterChanged] = useState(false);
 
     // --- Custom icons ---
     const blueIcon = new L.Icon({
@@ -66,12 +69,14 @@ export default function MapComponent({
         return blueIcon;
     };
 
-    // --- FUNGSI MENDAPATKAN LOKASI PENGGUNA DENGAN LEBIH AKURAT ---
-    useEffect(() => {
+    // FUNGSI MENDAPATKAN LOKASI PENGGUNA SAAT TOMBOL DITEKAN
+    const findMyLocation = () => {
+        setIsFindingLocation(true);
+        setLocationError(null);
         if ("geolocation" in navigator) {
             const options = {
                 enableHighAccuracy: true,
-                timeout: 5000,
+                timeout: 10000,
                 maximumAge: 0
             };
 
@@ -79,23 +84,32 @@ export default function MapComponent({
                 const { latitude, longitude, accuracy } = position.coords;
                 console.log(`✅ Lokasi ditemukan dengan akurasi: ${accuracy} meter.`);
                 setMyLocation({ lat: latitude, lon: longitude, accuracy: accuracy });
-                setLocationError(null);
+                setMapCenterChanged(true);
+                setIsFindingLocation(false);
             };
 
             const error = (err) => {
                 console.error(`❌ Gagal mendapatkan lokasi pengguna: ${err.message}`);
                 setLocationError(`Gagal mendapatkan lokasi. Kode: ${err.code}. Pesan: ${err.message}`);
                 setMyLocation(null);
+                setIsFindingLocation(false);
             };
 
-            const watchId = navigator.geolocation.watchPosition(success, error, options);
-
-            return () => navigator.geolocation.clearWatch(watchId);
+            navigator.geolocation.getCurrentPosition(success, error, options);
         } else {
             setLocationError("Geolocation tidak didukung oleh browser ini.");
             console.error("❌ Geolocation tidak didukung oleh browser ini.");
+            setIsFindingLocation(false);
         }
-    }, []);
+    };
+
+    // useEffect untuk memantau prop clearMyLocation
+    useEffect(() => {
+        if (clearMyLocation) {
+            setMyLocation(null);
+            console.log('📍 Lokasi pengguna telah dihapus dari peta.');
+        }
+    }, [clearMyLocation]);
 
     // Fetch nearest location saat myLocation berubah
     useEffect(() => {
@@ -175,7 +189,7 @@ export default function MapComponent({
                 minZoom={4}
                 maxZoom={18}
             >
-                <MapController myLocation={myLocation} searchedLocation={searchedLocation} />
+                <MapController myLocation={myLocation} searchedLocation={searchedLocation} mapCenterChanged={mapCenterChanged} />
 
                 {mapType === 'standard'
                     ? <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap contributors' />
@@ -430,8 +444,17 @@ export default function MapComponent({
                     onClick={() => setMapType(prev => prev === 'standard' ? 'satellite' : 'standard')}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    style={{ marginBottom: '10px' }}
                 >
                     {mapType === 'standard' ? '🌍 Peta Satelit' : '🗺 Peta Jalan'}
+                </motion.button>
+                <motion.button
+                    onClick={findMyLocation}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={isFindingLocation}
+                >
+                    {isFindingLocation ? '⏳ Mencari...' : '📍 Temukan Saya'}
                 </motion.button>
             </div>
         </div>
