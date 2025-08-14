@@ -36,7 +36,7 @@ export default function MapComponent({
     initialMapZoom,
     searchedLocation,
     API,
-    clearMyLocation, // Tambahkan prop baru untuk menghapus lokasi
+    clearMyLocation,
 }) {
     const [myLocation, setMyLocation] = useState(null);
     const [nearestData, setNearestData] = useState(null);
