@@ -249,7 +249,7 @@ ${penilaianSayuran.length > 0
             let responseText = '';
             if (geoResult) {
                 setSearchedLocation(geoResult);
-                setMyLocation(null);
+                setMyLocation(null); // Menghapus penanda lokasi pengguna saat mencari lokasi lain
 
                 // Fetch all locations from the API
                 const res = await axios.get(`https://bisakah.pythonanywhere.com/api/all`);
@@ -347,6 +347,7 @@ ${(cocok_untuk?.sayuran || []).length > 0
         setChatInput('');
         setSearchLocationInput('');
         setChatLoading(false);
+        // Menghapus semua penanda lokasi di peta
         setSearchedLocation(null);
         setMyLocation(null);
         setShowQuickSearchSuggestions(true);
@@ -371,7 +372,10 @@ ${(cocok_untuk?.sayuran || []).length > 0
                 {showMainApp && (
                     <div className="header-buttons">
                         <motion.button
-                            onClick={() => handleFindMe()}
+                            onClick={() => {
+                                handleFindMe(true); // Panggil handleFindMe untuk memicu pencarian lokasi
+                                setSearchedLocation(null); // Menghapus penanda lokasi pencarian
+                            }}
                             className="find-me-button"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
