@@ -108,7 +108,7 @@ export default function ChatbotSidebar({
     }, [chatHistory, botResponseText, isTyping]);
 
     // Handle typing animation
- useEffect(() => {
+  useEffect(() => {
     if (!botResponseText) return;
 
     let i = 0;
@@ -140,9 +140,8 @@ export default function ChatbotSidebar({
         }
     }, 10); // lebih cepat
 
-    return () => clearInterval(typingInterval);
-}, [botResponseText, setChatHistory]);
-
+        return () => clearInterval(typingInterval);
+    }, [botResponseText, setChatHistory]);
     
     // Fungsi untuk mengarahkan kembali ke bagian paling bawah chat
     const handleScrollToBottom = () => {
@@ -306,12 +305,14 @@ ${pilihan_tepat?.hewan?.length > 0 ? pilihan_tepat.hewan.join(', ') : 'Tidak ada
 ${pilihan_tepat?.sayuran?.length > 0 ? pilihan_tepat.sayuran.join(', ') : 'Tidak ada data'}
 
 **Penilaian:**
-🐄 Rekomendasi Hewan (Skor > 70):
-${pilihan_tepat?.hewan?.length > 0 ? pilihan_tepat.hewan.join(', ') : 'Tidak ada rekomendasi'}
-
-🥬 Rekomendasi Sayuran (Skor > 70):
-${pilihan_tepat?.sayuran?.length > 0 ? pilihan_tepat.sayuran.join(', ') : 'Tidak ada rekomendasi'}
-
+🐄 Hewan:
+${(cocok_untuk?.hewan || []).length > 0
+    ? cocok_untuk.hewan.map(item => `- ${item.nama || 'N/A'} (Skor: ${item.skor ?? 'N/A'}, ${item.alasan_skor || ''})`).join('\n')
+    : 'Tidak ada'}
+🥬 Sayuran:
+${(cocok_untuk?.sayuran || []).length > 0
+    ? cocok_untuk.sayuran.map(item => `- ${item.nama || 'N/A'} (Skor: ${item.skor ?? 'N/A'}, ${item.alasan_skor || ''})`).join('\n')
+    : 'Tidak ada'}
 `;
                 } else {
                     responseText = `❌ Tidak ada data lokasi yang tersedia.`;
