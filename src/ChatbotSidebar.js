@@ -108,45 +108,41 @@ export default function ChatbotSidebar({
     }, [chatHistory, botResponseText, isTyping]);
 
     // Handle typing animation
-    useEffect(() => {
-        if (!botResponseText) {
-            setIsTyping(false);
-            return;
-        }
+ useEffect(() => {
+    if (!botResponseText) return;
 
-        let i = 0;
-        let displayedText = '';
-        setIsTyping(true);
-        setShowScrollToBottom(false); // Sembunyikan notifikasi saat bot mengetik
+    let i = 0;
+    let displayedText = "";
+    const step = 3; // jumlah huruf per langkah
 
-        const typingInterval = setInterval(() => {
-            if (i < botResponseText.length) {
-                displayedText += botResponseText.charAt(i);
-                setChatHistory(prev => {
-                    const newHistory = [...prev];
-                    // Find the last message and update it
-                    if (newHistory.length > 0 && newHistory[newHistory.length - 1].type === 'bot') {
-                        newHistory[newHistory.length - 1].text = displayedText;
-                    } else {
-                        newHistory.push({ type: 'bot', text: displayedText });
-                    }
-                    return newHistory;
-                });
-                i++;
-            } else {
-                clearInterval(typingInterval);
-                setIsTyping(false);
-                setBotResponseText(''); // Reset typing text
-                // Setelah selesai, cek lagi apakah perlu menampilkan tombol scroll
-                const chatBody = chatBodyRef.current;
-                if (chatBody && chatBody.scrollHeight - chatBody.scrollTop > chatBody.clientHeight + 10) {
-                    setShowScrollToBottom(true);
+    const typingInterval = setInterval(() => {
+        if (i < botResponseText.length) {
+            displayedText += botResponseText.substr(i, step);
+            setChatHistory(prev => {
+                const newHistory = [...prev];
+                if (newHistory.length > 0 && newHistory[newHistory.length - 1].type === 'bot') {
+                    newHistory[newHistory.length - 1].text = displayedText;
+                } else {
+                    newHistory.push({ type: 'bot', text: displayedText });
                 }
-            }
-        }, 30); // Kecepatan mengetik
+                return newHistory;
+            });
+            i += step;
+        } else {
+            clearInterval(typingInterval);
+            setIsTyping(false);
+            setBotResponseText('');
 
-        return () => clearInterval(typingInterval);
-    }, [botResponseText, setChatHistory]);
+            const chatBody = chatBodyRef.current;
+            if (chatBody && chatBody.scrollHeight - chatBody.scrollTop > chatBody.clientHeight + 10) {
+                setShowScrollToBottom(true);
+            }
+        }
+    }, 10); // lebih cepat
+
+    return () => clearInterval(typingInterval);
+}, [botResponseText, setChatHistory]);
+
     
     // Fungsi untuk mengarahkan kembali ke bagian paling bawah chat
     const handleScrollToBottom = () => {
