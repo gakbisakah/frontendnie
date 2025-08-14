@@ -145,9 +145,14 @@ export default function MapComponent({
                                         Lokasi terdekat: {searchedNearestData.lokasi_terdekat?.desa || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kecamatan || 'N/A'}, {searchedNearestData.lokasi_terdekat?.kotkab || 'N/A'}, {searchedNearestData.lokasi_terdekat?.provinsi || 'N/A'}
                                         <br /><br />
                                         <b>Data Cuaca</b><br />
-                                        🌡 Suhu Saat Ini: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.suhu != null ? `${searchedNearestData.lokasi_terdekat.cuaca_saat_ini.suhu}°C` : 'N/A'}<br />
-                                        💧 Kelembapan Saat Ini: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.kelembapan != null ? `${searchedNearestData.lokasi_terdekat.cuaca_saat_ini.kelembapan}%` : 'N/A'}<br />
-                                        ☁️ Kondisi Cuaca: {searchedNearestData.lokasi_terdekat?.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br /><br />
+                                        🌡 Suhu Saat Ini: {searchedNearestData.lokasi_terdekat?.suhu_realtime != null 
+    ? `${searchedNearestData.lokasi_terdekat.suhu_realtime}°C` 
+    : 'N/A'}<br />
+💧 Kelembapan Saat Ini: {searchedNearestData.lokasi_terdekat?.kelembapan_realtime != null 
+    ? `${searchedNearestData.lokasi_terdekat.kelembapan_realtime}%` 
+    : 'N/A'}<br />
+☁️ Kondisi Cuaca: {searchedNearestData.lokasi_terdekat?.weather_desc || 'Tidak ada data'}<br /><br />
+
                                         
                                         <b>Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)</b><br />
                                         {searchedNearestData.rekomendasi?.hewan?.length > 0
@@ -305,9 +310,10 @@ export default function MapComponent({
                                     {nearestData?.lokasi_terdekat ? (
                                         <>
                                             🌏 <b>Lokasi Terdekat:</b> {nearestData.lokasi_terdekat.desa}, {nearestData.lokasi_terdekat.kecamatan}, {nearestData.lokasi_terdekat.kotkab}, {nearestData.lokasi_terdekat.provinsi}<br/><br/>
-                                            🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.suhu ?? 'N/A'}°C<br/>
-                                            💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat.cuaca_saat_ini?.kelembapan ?? 'N/A'}%<br/>
-                                            ☁️ Cuaca: {nearestData.lokasi_terdekat.cuaca_saat_ini?.cuaca || 'Tidak ada data'}<br/><br/>
+                                       🌡 Suhu Saat Ini: {nearestData.lokasi_terdekat?.suhu_realtime ?? 'N/A'}°C<br/>
+💧 Kelembapan Saat Ini: {nearestData.lokasi_terdekat?.kelembapan_realtime ?? 'N/A'}%<br/>
+☁️ Cuaca: {nearestData.lokasi_terdekat?.weather_desc || 'Tidak ada data'}<br/><br/>
+
                                             
                                             **Rekomendasi Hewan (Sangat Cocok, Skor ≥ 70)**<br/>
                                             {
