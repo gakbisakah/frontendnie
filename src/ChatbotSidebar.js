@@ -252,8 +252,8 @@ ${penilaianSayuran.length > 0
                 setMyLocation(null);
 
                 // Fetch all locations from the API
-                const res = await axios.get(`https://bisakah.pythonanywhere.com/api/all`);
-                const allLocations = res.data.lokasi || [];
+               const res = await axios.get(`https://bisakah.pythonanywhere.com/api/search?keyword=${encodeURIComponent(locationToSearch)}`);
+            const allLocations = res.data.lokasi || [];
                 
                 let nearestLocation = null;
                 let minDistance = Infinity;
